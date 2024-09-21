@@ -1,8 +1,6 @@
-package types
+package node
 
 import (
-	"errors"
-
 	"github.com/skjdfhkskjds/depinject/internal/graph"
 	"github.com/skjdfhkskjds/depinject/internal/reflect"
 )
@@ -17,8 +15,8 @@ type Node struct {
 	constructor *reflect.Func
 }
 
-// NewNode creates a new node.
-func NewNode(constructor any) (*Node, error) {
+// New creates a new node.
+func New(constructor any) (*Node, error) {
 	fn, err := reflect.NewFunc(constructor)
 	if err != nil {
 		return nil, err
@@ -49,7 +47,7 @@ func (n *Node) Execute(args ...any) error {
 	}
 
 	for _, value := range values {
-		n.outputs[reflect.TypeOf(value)] = value
+		n.outputs[value.Type()] = value
 	}
 
 	return nil
@@ -61,7 +59,7 @@ func (n *Node) ValueOf(t reflect.Type) (reflect.Value, error) {
 		return v, nil
 	}
 
-	return reflect.Value{}, errors.New("value not found")
+	return reflect.Value{}, ErrValueNotFound
 }
 
 // ID returns the ID of the node.

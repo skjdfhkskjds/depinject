@@ -1,4 +1,4 @@
-package types
+package errors
 
 import (
 	"fmt"
@@ -15,8 +15,8 @@ type Error struct {
 	args          []any
 }
 
-// NewError creates a new error.
-func NewError(root error, resolvingType string, args ...any) *Error {
+// New creates a new error.
+func New(root error, resolvingType string, args ...any) *Error {
 	return &Error{
 		root:          root,
 		resolvingType: resolvingType,

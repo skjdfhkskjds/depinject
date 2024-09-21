@@ -1,26 +1,23 @@
 package depinject
 
 import (
-	"reflect"
-
-	"github.com/skjdfhkskjds/depinject/internal/depinject/types"
+	"github.com/skjdfhkskjds/depinject/internal/depinject/types/errors"
+	"github.com/skjdfhkskjds/depinject/internal/depinject/types/node"
 	"github.com/skjdfhkskjds/depinject/internal/graph"
 )
 
 // A Container is a dependency injection container.
 type Container struct {
-	graph *graph.Graph[*types.Node]
+	graph *graph.Graph[*node.Node]
 
-	// nodes is a map of a particular output type in
-	// the container to the node which produces it.
-	nodes map[reflect.Type]*types.Node
+	registry *node.Registry
 }
 
 // NewContainer creates a new container.
 func NewContainer() *Container {
 	return &Container{
-		graph: graph.New[*types.Node](),
-		nodes: make(map[reflect.Type]*types.Node),
+		graph:    graph.New[*node.Node](),
+		registry: node.NewRegistry(),
 	}
 }
 
@@ -28,11 +25,11 @@ func NewContainer() *Container {
 // node, and creating edges in the internal graph representation
 // based on the dependencies and outputs of each node.
 func (c *Container) build() error {
-	for _, node := range c.nodes {
+	for _, node := range c.registry.Nodes() {
 		for _, dep := range node.Dependencies() {
-			source, ok := c.nodes[dep]
+			source, ok := c.registry.Get(dep)
 			if !ok {
-				return types.NewError(
+				return errors.New(
 					ErrMissingDependency,
 					node.ID(),
 					dep.Name(),
@@ -42,7 +39,7 @@ func (c *Container) build() error {
 			// Add the edge to the graph. If the edge violates
 			// the acyclicity constraint, return an error.
 			if err := c.graph.AddEdge(source, node); err != nil {
-				return types.NewError(
+				return errors.New(
 					err,
 					node.ID(),
 					dep.Name(),
@@ -67,11 +64,24 @@ func (c *Container) resolve() error {
 		depTypes := node.Dependencies()
 		deps := make([]any, 0, len(depTypes))
 		for _, dep := range depTypes {
-			value, err := c.nodes[dep].ValueOf(dep)
+			// Get the node that provides the dependency.
+			node, ok := c.registry.Get(dep)
+			if !ok {
+				return errors.New(
+					ErrMissingDependency,
+					node.ID(),
+					dep.Name(),
+				)
+			}
+
+			// Get the value of the dependency in the node.
+			value, err := node.ValueOf(dep)
 			if err != nil {
 				return err
 			}
-			deps = append(deps, value)
+
+			// Append the underlying casted value to deps
+			deps = append(deps, value.Interface())
 		}
 
 		// Execute the node with the dependencies.

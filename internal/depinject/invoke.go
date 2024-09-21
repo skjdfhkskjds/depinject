@@ -3,7 +3,7 @@ package depinject
 import (
 	"reflect"
 
-	"github.com/skjdfhkskjds/depinject/internal/depinject/types"
+	"github.com/skjdfhkskjds/depinject/internal/depinject/types/errors"
 )
 
 // Invoke resolves the container and extracts the resulting
@@ -47,9 +47,9 @@ func (c *Container) invoke(output any) error {
 	}
 
 	// Search for the output type in the container
-	node, ok := c.nodes[outputType]
+	node, ok := c.registry.Get(outputType)
 	if !ok {
-		return types.NewError(
+		return errors.New(
 			ErrMissingOutput,
 			outputType.String(),
 		)
@@ -58,7 +58,7 @@ func (c *Container) invoke(output any) error {
 	// Resolve the output
 	value, err := node.ValueOf(outputType)
 	if err != nil {
-		return types.NewError(
+		return errors.New(
 			err,
 			node.ID(),
 		)
