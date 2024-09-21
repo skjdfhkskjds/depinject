@@ -23,8 +23,8 @@ type Container struct {
 	nodes map[reflect.Type]*types.Node
 }
 
-// New creates a new container.
-func New() *Container {
+// NewContainer creates a new container.
+func NewContainer() *Container {
 	return &Container{
 		graph: graph.New[*types.Node](),
 		nodes: make(map[reflect.Type]*types.Node),
@@ -55,6 +55,35 @@ func (c *Container) build() error {
 					dep.Name(),
 				)
 			}
+		}
+	}
+
+	return nil
+}
+
+// resolve resolves the container by iterating through every
+// node in the container and executing them in a topological order.
+func (c *Container) resolve() error {
+	order, err := c.graph.TopologicalSort()
+	if err != nil {
+		return err
+	}
+
+	for _, node := range order {
+		// Get the dependencies of the node.
+		depTypes := node.Dependencies()
+		deps := make([]any, 0, len(depTypes))
+		for _, dep := range depTypes {
+			value, err := c.nodes[dep].ValueOf(dep)
+			if err != nil {
+				return err
+			}
+			deps = append(deps, value)
+		}
+
+		// Execute the node with the dependencies.
+		if err := node.Execute(deps...); err != nil {
+			return err
 		}
 	}
 

@@ -11,24 +11,24 @@ var _ graph.Vertex[*Node] = (*Node)(nil)
 
 // Node is a Node in the graph.
 type Node struct {
-	id       string
-	incoming []*Node
+	id string
 
 	outputs     map[reflect.Type]reflect.Value
 	constructor *reflect.Func
 }
 
 // NewNode creates a new node.
-func NewNode(constructor *reflect.Func) (*Node, error) {
-	return &Node{
-		outputs:     make(map[reflect.Type]reflect.Value),
-		constructor: constructor,
-	}, nil
-}
+func NewNode(constructor any) (*Node, error) {
+	fn, err := reflect.NewFunc(constructor)
+	if err != nil {
+		return nil, err
+	}
 
-// Init initializes the node with the given incoming nodes.
-func (n *Node) Init(incoming []*Node) {
-	n.incoming = append(n.incoming, incoming...)
+	return &Node{
+		id:          fn.Name,
+		outputs:     make(map[reflect.Type]reflect.Value),
+		constructor: fn,
+	}, nil
 }
 
 // Dependencies returns the dependencies of the node.
@@ -36,9 +36,14 @@ func (n *Node) Dependencies() []reflect.Type {
 	return n.constructor.Args
 }
 
+// Outputs returns the outputs of the node.
+func (n *Node) Outputs() []reflect.Type {
+	return n.constructor.Ret
+}
+
 // Execute executes the node.
-func (n *Node) Execute() error {
-	values, err := n.constructor.Call()
+func (n *Node) Execute(args ...any) error {
+	values, err := n.constructor.Call(args...)
 	if err != nil {
 		return err
 	}
@@ -62,9 +67,4 @@ func (n *Node) ValueOf(t reflect.Type) (reflect.Value, error) {
 // ID returns the ID of the node.
 func (n *Node) ID() string {
 	return n.id
-}
-
-// Incoming returns the incoming nodes of the node.
-func (n *Node) Incoming() []*Node {
-	return n.incoming
 }

@@ -18,6 +18,11 @@ func (c *Container) Invoke(outputs ...any) error {
 		return err
 	}
 
+	// Resolve the container
+	if err = c.resolve(); err != nil {
+		return err
+	}
+
 	// Invoke the outputs
 	for _, output := range outputs {
 		if err = c.invoke(output); err != nil {
