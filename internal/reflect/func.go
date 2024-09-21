@@ -2,17 +2,24 @@ package reflect
 
 import (
 	"reflect"
+	"runtime"
 )
 
 // A Func is a wrapper around a reflect function value that
 // provides convenience functions to get metadata and execute
 // a function.
 type Func struct {
+	// Name is the name of the function.
+	// It is formatted as "package.functionName".
 	Name string
 
+	// Args is the argument types of the function.
 	Args []reflect.Type
-	Ret  []reflect.Type
 
+	// Ret is the return types of the function.
+	Ret []reflect.Type
+
+	// fn is the executable reflect.Value of the function.
 	fn reflect.Value
 }
 
@@ -23,14 +30,13 @@ func NewFunc(f any) (*Func, error) {
 	funcType := reflect.TypeOf(f)
 
 	// Check if funcType is not nil and its kind is reflect.Func
-	// TODO: make this error more specific
 	if funcType == nil || funcType.Kind() != reflect.Func {
 		return nil, ErrNotAFunction
 	}
 
 	// Create a new Func instance
 	fn := &Func{
-		Name: funcType.Name(),
+		Name: runtime.FuncForPC(reflect.ValueOf(f).Pointer()).Name(),
 		Args: make([]reflect.Type, funcType.NumIn()),
 		Ret:  make([]reflect.Type, funcType.NumOut()),
 		fn:   reflect.ValueOf(f),

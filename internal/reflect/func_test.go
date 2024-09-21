@@ -9,6 +9,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+const pkgPath = "github.com/skjdfhkskjds/depinject/internal/reflect_test."
+
 // Mock functions for testing
 func add1(a int) int {
 	return a + 1
@@ -26,18 +28,24 @@ func divide(a, b int) (int, error) {
 // TestNewFunc tests the creation of a new Func instance.
 func TestNewFunc(t *testing.T) {
 	tests := []struct {
-		name       string
-		input      any
-		err        error
-		wantNumIn  int
-		wantNumOut int
+		name         string
+		input        any
+		err          error
+		wantNumIn    int
+		wantNumOut   int
+		wantInTypes  []reflect.Type
+		wantOutTypes []reflect.Type
+		wantName     string
 	}{
 		{
-			name:       "valid function with one input and one output",
-			input:      add1,
-			err:        nil,
-			wantNumIn:  1,
-			wantNumOut: 1,
+			name:         "valid function with one input and one output",
+			input:        add1,
+			err:          nil,
+			wantNumIn:    1,
+			wantNumOut:   1,
+			wantInTypes:  []reflect.Type{reflect.TypeOf(0)},
+			wantOutTypes: []reflect.Type{reflect.TypeOf(0)},
+			wantName:     pkgPath + "add1",
 		},
 		{
 			name:       "valid function with two inputs and two outputs",
@@ -45,20 +53,35 @@ func TestNewFunc(t *testing.T) {
 			err:        nil,
 			wantNumIn:  2,
 			wantNumOut: 2,
+			wantInTypes: []reflect.Type{
+				reflect.TypeOf(0),
+				reflect.TypeOf(0),
+			},
+			wantOutTypes: []reflect.Type{
+				reflect.TypeOf(0),
+				reflect.TypeOf((*error)(nil)).Elem(),
+			},
+			wantName: pkgPath + "divide",
 		},
 		{
-			name:       "nil input",
-			input:      nil,
-			err:        reflect.ErrNotAFunction,
-			wantNumIn:  0,
-			wantNumOut: 0,
+			name:         "nil input",
+			input:        nil,
+			err:          reflect.ErrNotAFunction,
+			wantNumIn:    0,
+			wantNumOut:   0,
+			wantInTypes:  nil,
+			wantOutTypes: nil,
+			wantName:     "",
 		},
 		{
-			name:       "non-function input",
-			input:      42,
-			err:        reflect.ErrNotAFunction,
-			wantNumIn:  0,
-			wantNumOut: 0,
+			name:         "non-function input",
+			input:        42,
+			err:          reflect.ErrNotAFunction,
+			wantNumIn:    0,
+			wantNumOut:   0,
+			wantInTypes:  nil,
+			wantOutTypes: nil,
+			wantName:     "",
 		},
 	}
 
@@ -73,6 +96,10 @@ func TestNewFunc(t *testing.T) {
 				return
 			}
 			assert.Equal(
+				t, tt.wantName, fn.Name,
+				"NewFunc() function name = %s, want %s", fn.Name, tt.wantName,
+			)
+			assert.Equal(
 				t, len(fn.Args), tt.wantNumIn,
 				"NewFunc() number of inputs = %d, want %d", len(fn.Args), tt.wantNumIn,
 			)
@@ -80,6 +107,18 @@ func TestNewFunc(t *testing.T) {
 				t, len(fn.Ret), tt.wantNumOut,
 				"NewFunc() number of outputs = %d, want %d", len(fn.Ret), tt.wantNumOut,
 			)
+			for i, arg := range fn.Args {
+				assert.Equal(
+					t, tt.wantInTypes[i], arg,
+					"Input type mismatch at index %d", i,
+				)
+			}
+			for i, ret := range fn.Ret {
+				assert.Equal(
+					t, tt.wantOutTypes[i], ret,
+					"Output type mismatch at index %d", i,
+				)
+			}
 		})
 	}
 }
