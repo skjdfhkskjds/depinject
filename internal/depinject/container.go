@@ -3,18 +3,11 @@ package depinject
 import (
 	"reflect"
 
-	"github.com/skjdfhkskjds/depinject/depinject/types"
+	"github.com/skjdfhkskjds/depinject/internal/depinject/types"
 	"github.com/skjdfhkskjds/depinject/internal/graph"
 )
 
 // A Container is a dependency injection container.
-// Container usage should be as follows:
-//
-//	container := New()
-//	container.Provide(constructor1, constructor2, ...)
-//	container.Invoke(func(dep1, dep2, ...) {
-//		// do something with the dependencies
-//	})
 type Container struct {
 	graph *graph.Graph[*types.Node]
 

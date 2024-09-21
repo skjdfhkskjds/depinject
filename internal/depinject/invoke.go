@@ -3,7 +3,7 @@ package depinject
 import (
 	"reflect"
 
-	"github.com/skjdfhkskjds/depinject/depinject/types"
+	"github.com/skjdfhkskjds/depinject/internal/depinject/types"
 )
 
 // Invoke resolves the container and extracts the resulting

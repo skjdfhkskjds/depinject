@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/skjdfhkskjds/depinject/depinject"
+	"github.com/skjdfhkskjds/depinject"
 )
 
 // UserService represents a service for managing users

@@ -1,6 +1,6 @@
 package depinject
 
-import "github.com/skjdfhkskjds/depinject/depinject/types"
+import "github.com/skjdfhkskjds/depinject/internal/depinject/types"
 
 // Provide adds a set of constructors to the container.
 // It returns an error if any of the constructors are invalid,
