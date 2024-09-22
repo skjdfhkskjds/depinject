@@ -32,7 +32,7 @@ package main
 
 import (
     "fmt"
-    "github.com/yourgithubusername/dependency-injection-framework"
+    "github.com/skjdfhkskjds/depinject"
 )
 
 type Foo struct{}
