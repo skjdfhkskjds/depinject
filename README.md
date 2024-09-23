@@ -9,7 +9,7 @@ This project is a runtime-based dependency injection framework written in Go des
 Currently the framework supports the following features:
 
 - Constructors which return types **exactly** as requested by another's constructor.
-    - Interface inferencing coming soon.
+- Constructors which return types which **implement interfaces** requested by another's constructor.
 - Supplying values directly into the container.
 
 ## Getting Started
