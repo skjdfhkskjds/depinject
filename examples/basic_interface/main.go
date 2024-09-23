@@ -1,60 +1,36 @@
 package main
 
 import (
-	"fmt"
-
 	"github.com/skjdfhkskjds/depinject"
+	"github.com/skjdfhkskjds/depinject/examples"
 )
 
-type Foo struct{}
-
-func NewFoo() *Foo {
-	return &Foo{}
-}
-
-type Bar struct{}
-
-var _ BarI = (*Bar)(nil)
-
-func NewBar(_ *Foo) *Bar {
-	return &Bar{}
-}
-
-func (b *Bar) Bar() {}
-
-type BarI interface {
-	Bar()
-}
-
-type FooBar struct{}
-
-type FooBarI interface {
-	Print()
-}
-
-func NewFooBar(_ *Foo, _ BarI) *FooBar {
-	return &FooBar{}
-}
-
-func (f *FooBar) Print() {
-	fmt.Println("Hello from FooBar!")
-}
+// This example demonstrates how to use the dependency injection
+// framework to inject types that implement interfaces into
+// other types.
+//
+// In this case, Foo is a hard type, Bar is a hard type implementing BarI
+// and FooBar has a constructor that requires both Foo and BarI.
+// Additionally, FooBarI is an interface that FooBar implements.
+//
+// We supply the constructors for Foo, Bar and FooBar into the container
+// and request an instance of FooBarI.
 
 func main() {
 	container := depinject.NewContainer()
 
 	// Provide a set of constructors into the container.
 	if err := container.Provide(
-		NewFoo,
-		NewBar,
-		NewFooBar,
+		examples.NewFoo,
+		examples.NewBar,
+		examples.NewFooBar,
 	); err != nil {
 		panic(err)
 	}
 
 	// Invoke a function with the dependencies injected
 	// to retrieve the FooBar instance.
-	var fooBar FooBarI
+	var fooBar examples.FooBarI
 	if err := container.Invoke(&fooBar); err != nil {
 		panic(err)
 	}
