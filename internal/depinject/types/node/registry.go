@@ -2,6 +2,7 @@ package node
 
 import (
 	stderr "errors"
+	stdreflect "reflect"
 
 	"github.com/skjdfhkskjds/depinject/internal/depinject/types/errors"
 	"github.com/skjdfhkskjds/depinject/internal/reflect"
@@ -47,6 +48,20 @@ func (r *Registry) Get(t reflect.Type) (*Node, error) {
 
 	// Check if the type is an interface, and if it is,
 	// check if there is an implementation registered.
+	if t.Kind() == stdreflect.Interface {
+		var foundNode *Node
+		for regType, node := range r.nodes {
+			if regType.Implements(t) {
+				if foundNode != nil {
+					return nil, ErrMultipleImplementations
+				}
+				foundNode = node
+			}
+		}
+		if foundNode != nil {
+			return foundNode, nil
+		}
+	}
 
 	return nil, ErrMissingDependency
 }
