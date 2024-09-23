@@ -27,13 +27,9 @@ func NewContainer() *Container {
 func (c *Container) build() error {
 	for _, node := range c.registry.Nodes() {
 		for _, dep := range node.Dependencies() {
-			source, ok := c.registry.Get(dep)
-			if !ok {
-				return errors.New(
-					ErrMissingDependency,
-					node.ID(),
-					dep.Name(),
-				)
+			source, err := c.registry.Get(dep)
+			if err != nil {
+				return errors.New(err, node.ID(), dep.Name())
 			}
 
 			// Add the edge to the graph. If the edge violates
@@ -65,13 +61,9 @@ func (c *Container) resolve() error {
 		deps := make([]any, 0, len(depTypes))
 		for _, dep := range depTypes {
 			// Get the node that provides the dependency.
-			node, ok := c.registry.Get(dep)
-			if !ok {
-				return errors.New(
-					ErrMissingDependency,
-					node.ID(),
-					dep.Name(),
-				)
+			node, err := c.registry.Get(dep)
+			if err != nil {
+				return errors.New(err, node.ID(), dep.Name())
 			}
 
 			// Get the value of the dependency in the node.

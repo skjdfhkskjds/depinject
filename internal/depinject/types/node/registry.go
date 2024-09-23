@@ -36,9 +36,14 @@ func (r *Registry) Register(node *Node) error {
 }
 
 // Get retrieves a node from the registry by its output type.
-func (r *Registry) Get(t reflect.Type) (*Node, bool) {
+// TODO: implement interface inferencing.
+func (r *Registry) Get(t reflect.Type) (*Node, error) {
 	node, ok := r.nodes[t]
-	return node, ok
+	if ok {
+		return node, nil
+	}
+
+	return nil, ErrMissingDependency
 }
 
 // Nodes returns all nodes in the registry.

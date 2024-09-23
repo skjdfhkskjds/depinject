@@ -47,12 +47,9 @@ func (c *Container) invoke(output any) error {
 	}
 
 	// Search for the output type in the container
-	node, ok := c.registry.Get(outputType)
-	if !ok {
-		return errors.New(
-			ErrMissingOutput,
-			outputType.String(),
-		)
+	node, err := c.registry.Get(outputType)
+	if err != nil {
+		return errors.New(err, outputType.String())
 	}
 
 	// Resolve the output
