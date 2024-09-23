@@ -1,6 +1,7 @@
 package reflect
 
 import (
+	"errors"
 	"reflect"
 	"runtime"
 )
@@ -31,7 +32,7 @@ func NewFunc(f any) (*Func, error) {
 
 	// Check if funcType is not nil and its kind is reflect.Func
 	if funcType == nil || funcType.Kind() != reflect.Func {
-		return nil, ErrNotAFunction
+		return nil, errors.Join(ErrNotAFunction, errors.New(funcType.String()))
 	}
 
 	// Create a new Func instance

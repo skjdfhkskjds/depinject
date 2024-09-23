@@ -31,8 +31,12 @@ func (f *FooBar) Print() {
 func main() {
 	container := depinject.NewContainer()
 
+	foo := &Foo{}
+
+	if err := container.Supply(foo); err != nil {
+		panic(err)
+	}
 	if err := container.Provide(
-		NewFoo,
 		NewBar,
 		NewFooBar,
 	); err != nil {
