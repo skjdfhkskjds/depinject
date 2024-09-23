@@ -23,7 +23,7 @@ func main() {
 	if err := container.Provide(
 		examples.NewFoo,
 		examples.NewBar,
-		examples.NewFooBar,
+		examples.NewFooBarWithBarI,
 	); err != nil {
 		panic(err)
 	}

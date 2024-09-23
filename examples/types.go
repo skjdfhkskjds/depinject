@@ -32,9 +32,17 @@ func (f *FooBar) Print() {
 /*                                Interfaces                                  */
 /* -------------------------------------------------------------------------- */
 
+func NewFooBarWithBarI(_ *Foo, _ BarI) *FooBar {
+	return &FooBar{}
+}
+
 type BarI interface {
 	Bar()
 }
+
+var _ BarI = (*Bar)(nil)
+
+func (b *Bar) Bar() {}
 
 type FooBarI interface {
 	Print()
