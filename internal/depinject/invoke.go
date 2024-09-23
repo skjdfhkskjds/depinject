@@ -46,19 +46,15 @@ func (c *Container) invoke(output any) error {
 		outputType = outputType.Elem()
 	}
 
-	// Search for the output type in the container
+	// Get the value of the output type in the container
 	node, err := c.registry.Get(outputType)
 	if err != nil {
 		return errors.New(err, outputType.String())
 	}
 
-	// Resolve the output
 	value, err := node.ValueOf(outputType)
 	if err != nil {
-		return errors.New(
-			err,
-			node.ID(),
-		)
+		return errors.New(err, outputType.String())
 	}
 
 	// Assign the value to the output

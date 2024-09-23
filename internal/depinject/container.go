@@ -60,16 +60,14 @@ func (c *Container) resolve() error {
 		depTypes := node.Dependencies()
 		deps := make([]any, 0, len(depTypes))
 		for _, dep := range depTypes {
-			// Get the node that provides the dependency.
-			node, err := c.registry.Get(dep)
+			source, err := c.registry.Get(dep)
 			if err != nil {
 				return errors.New(err, node.ID(), dep.Name())
 			}
 
-			// Get the value of the dependency in the node.
-			value, err := node.ValueOf(dep)
+			value, err := source.ValueOf(dep)
 			if err != nil {
-				return err
+				return errors.New(err, node.ID(), dep.Name())
 			}
 
 			// Append the underlying casted value to deps
