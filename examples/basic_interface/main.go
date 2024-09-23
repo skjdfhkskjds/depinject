@@ -43,13 +43,9 @@ func (f *FooBar) Print() {
 func main() {
 	container := depinject.NewContainer()
 
-	// Supply a value into the container directly.
-	if err := container.Supply(&Foo{}); err != nil {
-		panic(err)
-	}
-
 	// Provide a set of constructors into the container.
 	if err := container.Provide(
+		NewFoo,
 		NewBar,
 		NewFooBar,
 	); err != nil {
