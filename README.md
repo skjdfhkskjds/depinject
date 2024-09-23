@@ -4,6 +4,14 @@
 
 This project is a runtime-based dependency injection framework written in Go designed to simplify the management of dependencies in Go applications. It provides a robust and flexible way to construct your application components and resolve their dependencies at runtime.
 
+## Feature Support
+
+Currently the framework supports the following features:
+
+- Constructors which return types **exactly** as requested by another's constructor.
+    - Interface inferencing coming soon.
+- Supplying values directly into the container.
+
 ## Getting Started
 
 ### Clone the Project
@@ -58,21 +66,28 @@ func (f *FooBar) Print() {
 }
 
 func main() {
-    container := depinject.NewContainer()
+	container := depinject.NewContainer()
 
-    if err := container.Provide(
-        NewFoo,
-        NewBar,
-        NewFooBar,
-    ); err != nil {
-        panic(err)
-    }
+	// Supply a value into the container directly.
+	if err := container.Supply(&Foo{}); err != nil {
+		panic(err)
+	}
 
-    var fooBar *FooBar
-    if err := container.Invoke(&fooBar); err != nil {
-        panic(err)
-    }
-    fooBar.Print()
+	// Provide a set of constructors into the container.
+	if err := container.Provide(
+		NewBar,
+		NewFooBar,
+	); err != nil {
+		panic(err)
+	}
+
+	// Invoke a function with the dependencies injected
+	// to retrieve the FooBar instance.
+	var fooBar *FooBar
+	if err := container.Invoke(&fooBar); err != nil {
+		panic(err)
+	}
+	fooBar.Print()
 }
 ```
 

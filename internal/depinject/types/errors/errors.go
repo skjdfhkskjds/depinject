@@ -31,7 +31,7 @@ func (e *Error) Error() string {
 		e.root.Error(),
 	)
 	if len(e.args) > 0 {
-		msg += fmt.Sprintf(" (%v)", e.args)
+		msg += fmt.Sprintf(" (%v)", e.args...)
 	}
 
 	return msg

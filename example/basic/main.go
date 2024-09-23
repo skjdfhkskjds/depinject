@@ -31,11 +31,12 @@ func (f *FooBar) Print() {
 func main() {
 	container := depinject.NewContainer()
 
-	foo := &Foo{}
-
-	if err := container.Supply(foo); err != nil {
+	// Supply a value into the container directly.
+	if err := container.Supply(&Foo{}); err != nil {
 		panic(err)
 	}
+
+	// Provide a set of constructors into the container.
 	if err := container.Provide(
 		NewBar,
 		NewFooBar,
@@ -43,6 +44,8 @@ func main() {
 		panic(err)
 	}
 
+	// Invoke a function with the dependencies injected
+	// to retrieve the FooBar instance.
 	var fooBar *FooBar
 	if err := container.Invoke(&fooBar); err != nil {
 		panic(err)

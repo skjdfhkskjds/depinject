@@ -37,11 +37,16 @@ func (r *Registry) Register(node *Node) error {
 
 // Get retrieves a node from the registry by its output type.
 // TODO: implement interface inferencing.
+// TODO: implement list inferencing.
 func (r *Registry) Get(t reflect.Type) (*Node, error) {
+	// Check if the direct type exists in the registry.
 	node, ok := r.nodes[t]
 	if ok {
 		return node, nil
 	}
+
+	// Check if the type is an interface, and if it is,
+	// check if there is an implementation registered.
 
 	return nil, ErrMissingDependency
 }
