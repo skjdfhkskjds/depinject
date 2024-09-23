@@ -28,6 +28,10 @@ type BarI interface {
 
 type FooBar struct{}
 
+type FooBarI interface {
+	Print()
+}
+
 func NewFooBar(_ *Foo, _ BarI) *FooBar {
 	return &FooBar{}
 }
@@ -54,7 +58,7 @@ func main() {
 
 	// Invoke a function with the dependencies injected
 	// to retrieve the FooBar instance.
-	var fooBar *FooBar
+	var fooBar FooBarI
 	if err := container.Invoke(&fooBar); err != nil {
 		panic(err)
 	}
