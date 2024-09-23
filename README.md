@@ -91,7 +91,7 @@ func main() {
 }
 ```
 
-For more examples, check out the [example](./example) directory.
+For more examples, check out the [examples](./examples) directory.
 
 ## Documentation
 
