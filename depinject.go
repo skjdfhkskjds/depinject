@@ -15,6 +15,11 @@ type Container = depinject.Container
 // NewContainer returns a new, valid container.
 var NewContainer = depinject.NewContainer
 
+// In is a sentinel type used to indicate that a struct is
+// actually a container for various types that should be included
+// in the constructor's argument list.
+type In = depinject.In
+
 // Global container instance for users who would rather not
 // manage their own container instances.
 var c = NewContainer()
