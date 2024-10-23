@@ -11,14 +11,18 @@ var _ error = (*Error)(nil)
 type Error struct {
 	root error
 
+	sourceName    string
 	resolvingType string
 	args          []any
 }
 
 // New creates a new error.
-func New(root error, resolvingType string, args ...any) *Error {
+func New(
+	root error, sourceName, resolvingType string, args ...any,
+) *Error {
 	return &Error{
 		root:          root,
+		sourceName:    sourceName,
 		resolvingType: resolvingType,
 		args:          args,
 	}
@@ -26,7 +30,8 @@ func New(root error, resolvingType string, args ...any) *Error {
 
 func (e *Error) Error() string {
 	var msg = fmt.Sprintf(
-		"error while resolving %s: %s",
+		"error in %s: failed to resolve %s: %s",
+		e.sourceName,
 		e.resolvingType,
 		e.root.Error(),
 	)
