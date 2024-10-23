@@ -55,7 +55,7 @@ func (c *Container) build() error {
 		for _, dep := range node.Dependencies() {
 			source, err := c.registry.Get(dep)
 			if err != nil {
-				return errors.New(err, node.ID(), dep.Name())
+				return errors.New(err, buildErrorName, node.ID(), dep.Name())
 			}
 
 			// Add the edge to the graph. If the edge violates
