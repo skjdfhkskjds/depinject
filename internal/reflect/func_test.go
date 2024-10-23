@@ -27,12 +27,13 @@ func divide(a, b int) (int, error) {
 	return a / b, nil
 }
 
-// TestNewFunc tests the creation of a new Func instance using NewFunc.
-func TestNewFunc(t *testing.T) {
+// TestMakeNamedFunc tests the creation of a new Func instance using MakeNamedFunc.
+func TestMakeNamedFunc(t *testing.T) {
 	tests := []struct {
 		name         string
 		args         []reflect.Type
-		ret          []reflect.Value
+		ret          []reflect.Type
+		fn           func([]reflect.Value) []reflect.Value
 		wantErr      bool
 		wantNumIn    int
 		wantNumOut   int
@@ -41,9 +42,12 @@ func TestNewFunc(t *testing.T) {
 		wantName     string
 	}{
 		{
-			name:         "valid function with one input and one output",
-			args:         []reflect.Type{reflect.TypeOf(0)},
-			ret:          []reflect.Value{stdreflect.ValueOf(1)},
+			name: "valid function with one input and one output",
+			args: []reflect.Type{reflect.TypeOf(0)},
+			ret:  []reflect.Type{reflect.TypeOf(1)},
+			fn: func(args []reflect.Value) []reflect.Value {
+				return []reflect.Value{reflect.ValueOf(1)}
+			},
 			wantErr:      false,
 			wantNumIn:    1,
 			wantNumOut:   1,
@@ -54,9 +58,12 @@ func TestNewFunc(t *testing.T) {
 		{
 			name: "valid function with two inputs and two outputs",
 			args: []reflect.Type{reflect.TypeOf(0), reflect.TypeOf(0)},
-			ret: []reflect.Value{
-				stdreflect.ValueOf(1),
-				stdreflect.ValueOf(errors.New("")),
+			ret:  []reflect.Type{reflect.TypeOf(1), reflect.TypeOf(errors.New(""))},
+			fn: func(args []reflect.Value) []reflect.Value {
+				return []reflect.Value{
+					reflect.ValueOf(1),
+					reflect.ValueOf(errors.New("")),
+				}
 			},
 			wantErr:     false,
 			wantNumIn:   2,
@@ -71,7 +78,8 @@ func TestNewFunc(t *testing.T) {
 		{
 			name:         "no inputs and no outputs",
 			args:         []reflect.Type{},
-			ret:          []reflect.Value{},
+			ret:          []reflect.Type{},
+			fn:           nil,
 			wantErr:      false,
 			wantNumIn:    0,
 			wantNumOut:   0,
@@ -83,7 +91,7 @@ func TestNewFunc(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			fn, err := reflect.NewFunc(tt.args, tt.ret)
+			fn, err := reflect.MakeNamedFunc(tt.args, tt.ret, tt.fn)
 			if tt.wantErr {
 				assert.Error(t, err)
 				return
