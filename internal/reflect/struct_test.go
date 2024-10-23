@@ -42,11 +42,7 @@ func TestStruct_Constructor(t *testing.T) {
 	require.NoError(t, err)
 
 	constructor := s.Constructor()
-	result, err := constructor.Call(
-		reflect.ValueOf("test"),
-		reflect.ValueOf(42),
-		reflect.ValueOf(true),
-	)
+	result, err := constructor.Call("test", 42, true)
 	require.NoError(t, err)
 
 	require.Len(t, result, 1)
