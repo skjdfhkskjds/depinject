@@ -1,14 +1,11 @@
 package node
 
 import (
-	stderr "errors"
 	stdreflect "reflect"
 
 	"github.com/skjdfhkskjds/depinject/internal/depinject/types/errors"
 	"github.com/skjdfhkskjds/depinject/internal/reflect"
 )
-
-var ErrDuplicateOutput = stderr.New("duplicate output")
 
 // A Registry is a registry of nodes which stores node
 // data by inferring type associations to the node's outputs
@@ -28,7 +25,7 @@ func NewRegistry() *Registry {
 func (r *Registry) Register(node *Node) error {
 	for _, output := range node.Outputs() {
 		if _, ok := r.nodes[output]; ok {
-			return errors.New(ErrDuplicateOutput, output.String())
+			return errors.New(ErrDuplicateOutput, registryErrorName, output.String())
 		}
 		r.nodes[output] = node
 	}

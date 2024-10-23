@@ -8,6 +8,7 @@ type (
 )
 
 var (
-	TypeOf  = reflect.TypeOf
-	ValueOf = reflect.ValueOf
+	TypeOf   = reflect.TypeOf
+	ValueOf  = reflect.ValueOf
+	MakeFunc = reflect.MakeFunc
 )

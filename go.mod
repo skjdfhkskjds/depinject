@@ -1,6 +1,6 @@
 module github.com/skjdfhkskjds/depinject
 
-go 1.22.6
+go 1.23.2
 
 require (
 	github.com/dominikbraun/graph v0.23.0

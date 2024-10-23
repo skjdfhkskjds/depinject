@@ -1,8 +1,11 @@
 package depinject
 
 import (
+	"github.com/skjdfhkskjds/depinject/internal/depinject/types/errors"
 	"github.com/skjdfhkskjds/depinject/internal/depinject/types/node"
 )
+
+const provideErrorName = "provide"
 
 // Provide adds a set of constructors to the container.
 // It returns an error if any of the constructors are invalid,
@@ -26,9 +29,15 @@ func (c *Container) provide(constructor any) error {
 		return err
 	}
 
-	if err = c.graph.AddVertex(node); err != nil {
+	// Handle sentinels for the node
+	if err = c.handleSentinelsForNode(node); err != nil {
 		return err
 	}
 
-	return c.registry.Register(node)
+	// Add the node to the graph
+	if err = c.addNode(node); err != nil {
+		return errors.New(err, provideErrorName, node.ID())
+	}
+
+	return nil
 }

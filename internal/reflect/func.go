@@ -4,6 +4,13 @@ import (
 	"errors"
 	"reflect"
 	"runtime"
+	"strings"
+)
+
+const (
+	generatedFuncNamePrefix     = "GeneratedFunc"
+	generatedFuncNameArgsPrefix = "Args"
+	generatedFuncNameRetPrefix  = "Returns"
 )
 
 // A Func is a wrapper around a reflect function value that
@@ -15,32 +22,54 @@ type Func struct {
 	Name string
 
 	// Args is the argument types of the function.
-	Args []reflect.Type
+	Args []Type
 
 	// Ret is the return types of the function.
-	Ret []reflect.Type
+	Ret []Type
 
-	// fn is the executable reflect.Value of the function.
-	fn reflect.Value
+	// fn is the executable Value of the function.
+	fn Value
 }
 
-// NewFunc creates a new Func instance from the given function.
-// It returns an error if the reflect.TypeOf(f) is not a function.
-func NewFunc(f any) (*Func, error) {
-	// Check if f is a function
-	funcType := reflect.TypeOf(f)
+// MakeNamedFunc creates a new Func instance from the given argument and return
+// values.
+// It generates a function which when called consumes the specified args
+// and returns the given return values. It assigns this function a name
+// which is formatted as "GeneratedFuncArgs{argTypes...}Ret{retTypes...}".
+func MakeNamedFunc(args []Type, ret []Type, fn func([]Value) []Value) *Func {
+	name := generatedFuncNamePrefix +
+		"(" + formatList(generatedFuncNameArgsPrefix, args) +
+		formatList(generatedFuncNameRetPrefix, ret) + ")"
 
-	// Check if funcType is not nil and its kind is reflect.Func
+	return &Func{
+		Name: name,
+		Args: args,
+		Ret:  ret,
+		fn:   reflect.MakeFunc(reflect.FuncOf(args, ret, false), fn),
+	}
+}
+
+// WrapFunc wraps an existing go function into a Func instance.
+// It returns an error if the reflect.TypeOf(f) is not a function.
+func WrapFunc(f any) (*Func, error) {
+	if f == nil {
+		return nil, ErrNotAFunction
+	}
+
+	// Check if f is a function
+	funcType := TypeOf(f)
+
+	// Check if funcType is not nil and its kind is Func
 	if funcType == nil || funcType.Kind() != reflect.Func {
 		return nil, errors.Join(ErrNotAFunction, errors.New(funcType.String()))
 	}
 
 	// Create a new Func instance
 	fn := &Func{
-		Name: runtime.FuncForPC(reflect.ValueOf(f).Pointer()).Name(),
-		Args: make([]reflect.Type, funcType.NumIn()),
-		Ret:  make([]reflect.Type, funcType.NumOut()),
-		fn:   reflect.ValueOf(f),
+		Name: runtime.FuncForPC(ValueOf(f).Pointer()).Name(),
+		Args: make([]Type, funcType.NumIn()),
+		Ret:  make([]Type, funcType.NumOut()),
+		fn:   ValueOf(f),
 	}
 
 	// Extract argument types
@@ -57,15 +86,15 @@ func NewFunc(f any) (*Func, error) {
 }
 
 // Call calls the original function with the given arguments.
-func (f *Func) Call(args ...any) ([]reflect.Value, error) {
+func (f *Func) Call(args ...any) ([]Value, error) {
 	if len(args) != len(f.Args) {
 		return nil, ErrWrongNumArgs
 	}
 
-	// Get the arguments as reflect.Values
-	in := make([]reflect.Value, len(args))
+	// Get the arguments as Values
+	in := make([]Value, len(args))
 	for i, arg := range args {
-		in[i] = reflect.ValueOf(arg)
+		in[i] = ValueOf(arg)
 	}
 
 	// Call the function
@@ -78,11 +107,19 @@ func (f *Func) Call(args ...any) ([]reflect.Value, error) {
 		return nil, nil
 	}
 	lastReturnValue := res[len(res)-1]
-	if lastReturnValue.Type().Implements(reflect.TypeOf((*error)(nil)).Elem()) {
+	if lastReturnValue.Type().Implements(TypeOf((*error)(nil)).Elem()) {
 		if !lastReturnValue.IsNil() {
 			return nil, lastReturnValue.Interface().(error)
 		}
 	}
 
 	return res, nil
+}
+
+func formatList(prefix string, list []reflect.Type) string {
+	types := make([]string, len(list))
+	for i, t := range list {
+		types[i] = t.String()
+	}
+	return prefix + "{" + strings.Join(types, ", ") + "}"
 }
