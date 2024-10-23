@@ -29,6 +29,12 @@ func (c *Container) provide(constructor any) error {
 		return err
 	}
 
+	// Handle sentinels for the node
+	if err = c.handleSentinelsForNode(node); err != nil {
+		return err
+	}
+
+	// Add the node to the graph
 	if err = c.addNode(node); err != nil {
 		return errors.New(err, provideErrorName, node.ID())
 	}

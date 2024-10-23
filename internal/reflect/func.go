@@ -22,13 +22,13 @@ type Func struct {
 	Name string
 
 	// Args is the argument types of the function.
-	Args []reflect.Type
+	Args []Type
 
 	// Ret is the return types of the function.
-	Ret []reflect.Type
+	Ret []Type
 
-	// fn is the executable reflect.Value of the function.
-	fn reflect.Value
+	// fn is the executable Value of the function.
+	fn Value
 }
 
 // MakeNamedFunc creates a new Func instance from the given argument and return
@@ -57,19 +57,19 @@ func WrapFunc(f any) (*Func, error) {
 	}
 
 	// Check if f is a function
-	funcType := reflect.TypeOf(f)
+	funcType := TypeOf(f)
 
-	// Check if funcType is not nil and its kind is reflect.Func
+	// Check if funcType is not nil and its kind is Func
 	if funcType == nil || funcType.Kind() != reflect.Func {
 		return nil, errors.Join(ErrNotAFunction, errors.New(funcType.String()))
 	}
 
 	// Create a new Func instance
 	fn := &Func{
-		Name: runtime.FuncForPC(reflect.ValueOf(f).Pointer()).Name(),
-		Args: make([]reflect.Type, funcType.NumIn()),
-		Ret:  make([]reflect.Type, funcType.NumOut()),
-		fn:   reflect.ValueOf(f),
+		Name: runtime.FuncForPC(ValueOf(f).Pointer()).Name(),
+		Args: make([]Type, funcType.NumIn()),
+		Ret:  make([]Type, funcType.NumOut()),
+		fn:   ValueOf(f),
 	}
 
 	// Extract argument types
@@ -86,15 +86,15 @@ func WrapFunc(f any) (*Func, error) {
 }
 
 // Call calls the original function with the given arguments.
-func (f *Func) Call(args ...any) ([]reflect.Value, error) {
+func (f *Func) Call(args ...any) ([]Value, error) {
 	if len(args) != len(f.Args) {
 		return nil, ErrWrongNumArgs
 	}
 
-	// Get the arguments as reflect.Values
-	in := make([]reflect.Value, len(args))
+	// Get the arguments as Values
+	in := make([]Value, len(args))
 	for i, arg := range args {
-		in[i] = reflect.ValueOf(arg)
+		in[i] = ValueOf(arg)
 	}
 
 	// Call the function
@@ -107,7 +107,7 @@ func (f *Func) Call(args ...any) ([]reflect.Value, error) {
 		return nil, nil
 	}
 	lastReturnValue := res[len(res)-1]
-	if lastReturnValue.Type().Implements(reflect.TypeOf((*error)(nil)).Elem()) {
+	if lastReturnValue.Type().Implements(TypeOf((*error)(nil)).Elem()) {
 		if !lastReturnValue.IsNil() {
 			return nil, lastReturnValue.Interface().(error)
 		}

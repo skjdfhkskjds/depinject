@@ -1,16 +1,26 @@
 package depinject
 
-import "github.com/skjdfhkskjds/depinject/internal/depinject"
+import (
+	"github.com/skjdfhkskjds/depinject/internal/depinject"
+	"github.com/skjdfhkskjds/depinject/internal/depinject/types/sentinels"
+)
 
-// Container is the main entrypoint of this depinject library.
-// Its usage should be as follows:
-//
-//	container := NewContainer()
-//	container.Provide(constructor1, constructor2, ...)
-//	container.Invoke(func(dep1, dep2, ...) {
-//		// do something with the dependencies
-//	})
-type Container = depinject.Container
+type (
+	// Container is the main entrypoint of this depinject library.
+	// Its usage should be as follows:
+	//
+	//	container := NewContainer()
+	//	container.Provide(constructor1, constructor2, ...)
+	//	container.Invoke(func(dep1, dep2, ...) {
+	//		// do something with the dependencies
+	//	})
+	Container = depinject.Container
+
+	// In is a sentinel type used to indicate that a struct is
+	// actually a container for various types that should be included
+	// in the constructor's argument list.
+	In = sentinels.In
+)
 
 // NewContainer returns a new, valid container.
 var NewContainer = depinject.NewContainer

@@ -3,6 +3,7 @@ package depinject
 import (
 	"github.com/skjdfhkskjds/depinject/internal/depinject/types/errors"
 	"github.com/skjdfhkskjds/depinject/internal/depinject/types/node"
+	"github.com/skjdfhkskjds/depinject/internal/depinject/types/sentinels"
 	"github.com/skjdfhkskjds/depinject/internal/graph"
 )
 
@@ -13,9 +14,15 @@ const (
 
 // A Container is a dependency injection container.
 type Container struct {
+	// The internal graph representation of the container.
 	graph *graph.Graph[*node.Node]
 
+	// The node registry of the container.
 	registry *node.Registry
+
+	// Whether the container requires sentinels.
+	hasIn  bool
+	hasOut bool
 }
 
 // NewContainer creates a new container.
@@ -23,6 +30,8 @@ func NewContainer() *Container {
 	return &Container{
 		graph:    graph.New[*node.Node](),
 		registry: node.NewRegistry(),
+		hasIn:    false,
+		hasOut:   false,
 	}
 }
 
@@ -30,6 +39,18 @@ func NewContainer() *Container {
 // node, and creating edges in the internal graph representation
 // based on the dependencies and outputs of each node.
 func (c *Container) build() error {
+	// Before building, supply the sentinels.
+	if c.hasIn {
+		if err := c.supply(sentinels.In{}); err != nil {
+			return err
+		}
+	}
+	if c.hasOut {
+		if err := c.supply(sentinels.Out{}); err != nil {
+			return err
+		}
+	}
+
 	for _, node := range c.registry.Nodes() {
 		for _, dep := range node.Dependencies() {
 			source, err := c.registry.Get(dep)
