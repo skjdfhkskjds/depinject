@@ -32,15 +32,17 @@ func NewStruct(s any) (*Struct, error) {
 }
 
 // Constructor returns a function that constructs a new instance of the struct.
-func (s *Struct) Constructor() Value {
-	return MakeFunc(
-		reflect.FuncOf(s.NamedFields, []Type{s.StructType}, false),
-		func(args []Value) []Value {
-			structValue := reflect.New(s.StructType).Elem()
-			for i := range s.NamedFields {
-				structValue.Field(i).Set(args[i])
-			}
-			return []Value{structValue}
-		},
-	)
+func (s *Struct) Constructor() *Func {
+	// return MakeFunc(
+	// 	reflect.FuncOf(s.NamedFields, []Type{s.StructType}, false),
+	// 	func(args []Value) []Value {
+	// 		structValue := reflect.New(s.StructType).Elem()
+	// 		for i := range s.NamedFields {
+	// 			structValue.Field(i).Set(args[i])
+	// 		}
+	// 		return []Value{structValue}
+	// 	},
+	// )
+
+	
 }

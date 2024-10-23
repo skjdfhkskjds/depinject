@@ -68,6 +68,10 @@ func NewFunc(args []Type, ret []Value) (*Func, error) {
 // WrapFunc wraps an existing go function into a Func instance.
 // It returns an error if the reflect.TypeOf(f) is not a function.
 func WrapFunc(f any) (*Func, error) {
+	if f == nil {
+		return nil, ErrNotAFunction
+	}
+
 	// Check if f is a function
 	funcType := TypeOf(f)
 

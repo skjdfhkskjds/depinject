@@ -42,5 +42,10 @@ func (c *Container) handleIn(t reflect.Type) error {
 		return err
 	}
 
-	return c.Provide(s.Constructor())
+	node := node.NewFromFunc(s.Constructor())
+	if err = c.addNode(node); err != nil {
+		return err
+	}
+
+	return nil
 }

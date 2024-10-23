@@ -1,8 +1,6 @@
 package depinject
 
 import (
-	"fmt"
-
 	"github.com/skjdfhkskjds/depinject/internal/depinject/types/errors"
 	"github.com/skjdfhkskjds/depinject/internal/depinject/types/node"
 	"github.com/skjdfhkskjds/depinject/internal/reflect"
@@ -35,7 +33,6 @@ func (c *Container) supply(value any) error {
 
 	node := node.NewFromFunc(fn)
 	if err = c.addNode(node); err != nil {
-		fmt.Println("NODE NAME", node.ID())
 		return errors.New(err, supplyErrorName, reflect.TypeOf(value).String())
 	}
 

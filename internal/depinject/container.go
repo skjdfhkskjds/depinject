@@ -1,8 +1,6 @@
 package depinject
 
 import (
-	"fmt"
-
 	"github.com/skjdfhkskjds/depinject/internal/depinject/types/errors"
 	"github.com/skjdfhkskjds/depinject/internal/depinject/types/node"
 	"github.com/skjdfhkskjds/depinject/internal/graph"
@@ -95,7 +93,6 @@ func (c *Container) resolve() error {
 // addNode adds a node to the container.
 func (c *Container) addNode(node *node.Node) error {
 	if err := c.graph.AddVertex(node); err != nil {
-		fmt.Println("ERROR HERE	")
 		return err
 	}
 
