@@ -31,6 +31,12 @@ To run the project and see the dependency injection in action:
 $ go run ./example/basic
 ```
 
+or run
+
+```bash
+$ make run example=basic
+```
+
 ## Example Usage
 
 Here is a simple example demonstrating how to use the dependency injection framework:
