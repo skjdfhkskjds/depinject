@@ -1,9 +1,16 @@
 package depinject
 
 import (
+	"fmt"
+
 	"github.com/skjdfhkskjds/depinject/internal/depinject/types/errors"
 	"github.com/skjdfhkskjds/depinject/internal/depinject/types/node"
 	"github.com/skjdfhkskjds/depinject/internal/graph"
+)
+
+const (
+	buildErrorName   = "build"
+	resolveErrorName = "resolve"
 )
 
 // A Container is a dependency injection container.
@@ -35,11 +42,7 @@ func (c *Container) build() error {
 			// Add the edge to the graph. If the edge violates
 			// the acyclicity constraint, return an error.
 			if err := c.graph.AddEdge(source, node); err != nil {
-				return errors.New(
-					err,
-					node.ID(),
-					dep.Name(),
-				)
+				return errors.New(err, buildErrorName, node.ID(), dep.Name())
 			}
 		}
 	}
@@ -62,12 +65,12 @@ func (c *Container) resolve() error {
 		for _, dep := range depTypes {
 			source, err := c.registry.Get(dep)
 			if err != nil {
-				return errors.New(err, node.ID(), dep.Name())
+				return errors.New(err, resolveErrorName, node.ID(), dep.Name())
 			}
 
 			value, err := source.ValueOf(dep)
 			if err != nil {
-				return errors.New(err, node.ID(), dep.Name())
+				return errors.New(err, resolveErrorName, node.ID(), dep.Name())
 			}
 
 			// Append the underlying casted value to deps
@@ -76,9 +79,19 @@ func (c *Container) resolve() error {
 
 		// Execute the node with the dependencies.
 		if err := node.Execute(deps...); err != nil {
-			return err
+			return errors.New(err, resolveErrorName, node.ID())
 		}
 	}
 
 	return nil
+}
+
+// addNode adds a node to the container.
+func (c *Container) addNode(node *node.Node) error {
+	if err := c.graph.AddVertex(node); err != nil {
+		fmt.Println("ERROR HERE	")
+		return err
+	}
+
+	return c.registry.Register(node)
 }

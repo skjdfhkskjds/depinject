@@ -2,6 +2,7 @@ package reflect_test
 
 import (
 	"errors"
+	"fmt"
 	stdreflect "reflect"
 	"testing"
 
@@ -25,8 +26,82 @@ func divide(a, b int) (int, error) {
 	return a / b, nil
 }
 
-// TestNewFunc tests the creation of a new Func instance.
+// TestNewFunc tests the creation of a new Func instance using NewFunc.
 func TestNewFunc(t *testing.T) {
+	tests := []struct {
+		name         string
+		args         []reflect.Type
+		ret          []reflect.Value
+		wantErr      bool
+		wantNumIn    int
+		wantNumOut   int
+		wantInTypes  []reflect.Type
+		wantOutTypes []reflect.Type
+		wantName     string
+	}{
+		{
+			name:         "valid function with one input and one output",
+			args:         []reflect.Type{reflect.TypeOf(0)},
+			ret:          []reflect.Value{stdreflect.ValueOf(1)},
+			wantErr:      false,
+			wantNumIn:    1,
+			wantNumOut:   1,
+			wantInTypes:  []reflect.Type{reflect.TypeOf(0)},
+			wantOutTypes: []reflect.Type{reflect.TypeOf(1)},
+			wantName:     "GeneratedFuncArgsintRetint",
+		},
+		{
+			name: "valid function with two inputs and two outputs",
+			args: []reflect.Type{reflect.TypeOf(0), reflect.TypeOf(0)},
+			ret: []reflect.Value{
+				stdreflect.ValueOf(1),
+				stdreflect.ValueOf(errors.New("")),
+			},
+			wantErr:     false,
+			wantNumIn:   2,
+			wantNumOut:  2,
+			wantInTypes: []reflect.Type{reflect.TypeOf(0), reflect.TypeOf(0)},
+			wantOutTypes: []reflect.Type{
+				reflect.TypeOf(0),
+				reflect.TypeOf(errors.New("")),
+			},
+			wantName: "GeneratedFuncArgsintintRetint*errors.errorString",
+		},
+		{
+			name:         "no inputs and no outputs",
+			args:         []reflect.Type{},
+			ret:          []reflect.Value{},
+			wantErr:      false,
+			wantNumIn:    0,
+			wantNumOut:   0,
+			wantInTypes:  []reflect.Type{},
+			wantOutTypes: []reflect.Type{},
+			wantName:     "GeneratedFuncArgsRet",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			fn, err := reflect.NewFunc(tt.args, tt.ret)
+			if tt.wantErr {
+				assert.Error(t, err)
+				return
+			}
+			assert.NoError(t, err)
+			assert.NotNil(t, fn)
+
+			assert.Equal(t, tt.wantNumIn, len(fn.Args))
+			assert.Equal(t, tt.wantNumOut, len(fn.Ret))
+			assert.Equal(t, tt.wantInTypes, fn.Args)
+			assert.Equal(t, tt.wantOutTypes, fn.Ret)
+			fmt.Println("fn.Name", fn.Name)
+			assert.Equal(t, fn.Name, tt.wantName)
+		})
+	}
+}
+
+// TestWrapFunc tests the creation of a new Func instance.
+func TestWrapFunc(t *testing.T) {
 	tests := []struct {
 		name         string
 		input        any
@@ -87,7 +162,7 @@ func TestNewFunc(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			fn, err := reflect.NewFunc(tt.input)
+			fn, err := reflect.WrapFunc(tt.input)
 			assert.ErrorIs(
 				t, err, tt.err,
 				"NewFunc() error = %v, wantErr %v", err, tt.err,
@@ -125,8 +200,8 @@ func TestNewFunc(t *testing.T) {
 
 // TestFunc_Call tests the Call method of the Func type.
 func TestFunc_Call(t *testing.T) {
-	addFn, _ := reflect.NewFunc(add1)
-	divideFn, _ := reflect.NewFunc(divide)
+	addFn, _ := reflect.WrapFunc(add1)
+	divideFn, _ := reflect.WrapFunc(divide)
 	tests := []struct {
 		name   string
 		f      *reflect.Func
