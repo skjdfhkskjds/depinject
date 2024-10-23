@@ -12,4 +12,11 @@ var (
 	// ErrMultipleImplementations is returned when multiple implementations
 	// of an interface are found.
 	ErrMultipleImplementations = errors.New("multiple implementations found")
+
+	// ErrDuplicateOutput is returned when a duplicate output is found.
+	ErrDuplicateOutput = errors.New("duplicate output")
+)
+
+const (
+	registryErrorName = "registry"
 )

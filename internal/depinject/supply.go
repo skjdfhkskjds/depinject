@@ -1,8 +1,14 @@
 package depinject
 
 import (
-	"reflect"
+	"fmt"
+
+	"github.com/skjdfhkskjds/depinject/internal/depinject/types/errors"
+	"github.com/skjdfhkskjds/depinject/internal/depinject/types/node"
+	"github.com/skjdfhkskjds/depinject/internal/reflect"
 )
+
+const supplyErrorName = "supply"
 
 // Supply is a helper function that allows for the injection of
 // values into the container. It is useful for injecting values
@@ -18,16 +24,20 @@ func (c *Container) Supply(values ...any) error {
 }
 
 func (c *Container) supply(value any) error {
-	// Use reflect to get the type and value of the supplied value
-	valueType := reflect.TypeOf(value)
-
 	// Generate a function that returns the supplied value
-	fn := reflect.MakeFunc(
-		reflect.FuncOf(nil, []reflect.Type{valueType}, false),
-		func(args []reflect.Value) []reflect.Value {
-			return []reflect.Value{reflect.ValueOf(value)}
-		},
+	fn, err := reflect.NewFunc(
+		nil,
+		[]reflect.Value{reflect.ValueOf(value)},
 	)
+	if err != nil {
+		return errors.New(err, supplyErrorName, reflect.TypeOf(value).String())
+	}
 
-	return c.Provide(fn.Interface())
+	node := node.NewFromFunc(fn)
+	if err = c.addNode(node); err != nil {
+		fmt.Println("NODE NAME", node.ID())
+		return errors.New(err, supplyErrorName, reflect.TypeOf(value).String())
+	}
+
+	return nil
 }

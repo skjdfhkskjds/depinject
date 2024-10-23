@@ -19,7 +19,7 @@ type Node struct {
 
 // New creates a new node.
 func New(constructor any) (*Node, error) {
-	fn, err := reflect.NewFunc(constructor)
+	fn, err := reflect.WrapFunc(constructor)
 	if err != nil {
 		return nil, err
 	}
@@ -29,6 +29,15 @@ func New(constructor any) (*Node, error) {
 		outputs:     make(map[reflect.Type]reflect.Value),
 		constructor: fn,
 	}, nil
+}
+
+// NewFromFunc creates a new node from a reflect.Func.
+func NewFromFunc(fn *reflect.Func) *Node {
+	return &Node{
+		id:          fn.Name,
+		outputs:     make(map[reflect.Type]reflect.Value),
+		constructor: fn,
+	}
 }
 
 // Dependencies returns the dependencies of the node.

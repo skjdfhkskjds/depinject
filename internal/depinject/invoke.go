@@ -6,6 +6,8 @@ import (
 	"github.com/skjdfhkskjds/depinject/internal/depinject/types/errors"
 )
 
+const invokeErrorName = "invoke"
+
 // Invoke resolves the container and extracts the resulting
 // values from the container.
 // It returns an error if the container is invalid (not resolvable), or
@@ -49,12 +51,12 @@ func (c *Container) invoke(output any) error {
 	// Get the value of the output type in the container
 	node, err := c.registry.Get(outputType)
 	if err != nil {
-		return errors.New(err, outputType.String())
+		return errors.New(err, invokeErrorName, outputType.String())
 	}
 
 	value, err := node.ValueOf(outputType)
 	if err != nil {
-		return errors.New(err, outputType.String())
+		return errors.New(err, invokeErrorName, outputType.String())
 	}
 
 	// Assign the value to the output

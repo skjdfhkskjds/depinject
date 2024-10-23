@@ -6,6 +6,12 @@ import (
 	"runtime"
 )
 
+const (
+	generatedFuncNamePrefix     = "GeneratedFunc"
+	generatedFuncNameArgsPrefix = "Args"
+	generatedFuncNameRetPrefix  = "Ret"
+)
+
 // A Func is a wrapper around a reflect function value that
 // provides convenience functions to get metadata and execute
 // a function.
@@ -24,13 +30,44 @@ type Func struct {
 	fn Value
 }
 
-// NewFunc creates a new Func instance from the given function.
-// It returns an error if the TypeOf(f) is not a function.
-func NewFunc(f any) (*Func, error) {
-	if f == nil {
-		return nil, ErrNotAFunction
+// NewFunc creates a new Func instance from the given argument and return
+// values.
+// It generates a function which when called consumes the specified args
+// and returns the given return values. It assigns this function a name
+// which is formatted as "GeneratedFuncArgs{argTypes...}Ret{retTypes...}".
+func NewFunc(args []Type, ret []Value) (*Func, error) {
+	retTypes := make([]reflect.Type, len(ret))
+	for i, retValue := range ret {
+		retTypes[i] = retValue.Type()
 	}
 
+	fn := reflect.MakeFunc(
+		reflect.FuncOf(nil, retTypes, false),
+		func(args []reflect.Value) []reflect.Value {
+			return ret
+		},
+	)
+
+	name := generatedFuncNamePrefix + generatedFuncNameArgsPrefix
+	for _, argType := range args {
+		name += argType.String()
+	}
+	name += generatedFuncNameRetPrefix
+	for _, retType := range retTypes {
+		name += retType.String()
+	}
+
+	return &Func{
+		Name: name,
+		Args: args,
+		Ret:  retTypes,
+		fn:   fn,
+	}, nil
+}
+
+// WrapFunc wraps an existing go function into a Func instance.
+// It returns an error if the reflect.TypeOf(f) is not a function.
+func WrapFunc(f any) (*Func, error) {
 	// Check if f is a function
 	funcType := TypeOf(f)
 
