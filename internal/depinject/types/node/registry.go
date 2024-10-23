@@ -49,7 +49,7 @@ func (r *Registry) Get(t reflect.Type) (*Node, error) {
 		for regType, node := range r.nodes {
 			if regType.Implements(t) {
 				if foundNode != nil {
-					return nil, ErrMultipleImplementations
+					return nil, ErrMultipleImplementations(t)
 				}
 				foundNode = node
 			}
@@ -59,7 +59,7 @@ func (r *Registry) Get(t reflect.Type) (*Node, error) {
 		}
 	}
 
-	return nil, ErrMissingDependency
+	return nil, ErrMissingDependency(t)
 }
 
 // Nodes returns all nodes in the registry.

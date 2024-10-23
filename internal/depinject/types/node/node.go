@@ -77,7 +77,7 @@ func (n *Node) ValueOf(t reflect.Type) (reflect.Value, error) {
 		for _, output := range n.Outputs() {
 			if output.Implements(t) {
 				if impl != nil {
-					return reflect.Value{}, ErrMultipleImplementations
+					return reflect.Value{}, ErrMultipleImplementations(t)
 				}
 				impl = output
 			}
@@ -87,7 +87,7 @@ func (n *Node) ValueOf(t reflect.Type) (reflect.Value, error) {
 		}
 	}
 
-	return reflect.Value{}, ErrValueNotFound
+	return reflect.Value{}, ErrValueNotFound(t)
 }
 
 // ID returns the ID of the node.
