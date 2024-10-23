@@ -30,38 +30,26 @@ type Func struct {
 	fn reflect.Value
 }
 
-// NewFunc creates a new Func instance from the given argument and return
+// MakeNamedFunc creates a new Func instance from the given argument and return
 // values.
 // It generates a function which when called consumes the specified args
 // and returns the given return values. It assigns this function a name
 // which is formatted as "GeneratedFuncArgs{argTypes...}Ret{retTypes...}".
-func NewFunc(args []Type, ret []Value) (*Func, error) {
-	retTypes := make([]reflect.Type, len(ret))
-	for i, retValue := range ret {
-		retTypes[i] = retValue.Type()
-	}
-
-	fn := reflect.MakeFunc(
-		reflect.FuncOf(nil, retTypes, false),
-		func(args []reflect.Value) []reflect.Value {
-			return ret
-		},
-	)
-
+func MakeNamedFunc(args []Type, ret []Type, fn func([]Value) []Value) (*Func, error) {
 	name := generatedFuncNamePrefix + generatedFuncNameArgsPrefix
 	for _, argType := range args {
 		name += argType.String()
 	}
 	name += generatedFuncNameRetPrefix
-	for _, retType := range retTypes {
+	for _, retType := range ret {
 		name += retType.String()
 	}
 
 	return &Func{
 		Name: name,
 		Args: args,
-		Ret:  retTypes,
-		fn:   fn,
+		Ret:  ret,
+		fn:   reflect.MakeFunc(reflect.FuncOf(nil, ret, false), fn),
 	}, nil
 }
 
