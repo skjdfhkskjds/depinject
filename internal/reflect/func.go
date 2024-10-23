@@ -55,12 +55,6 @@ func WrapFunc(f any) (*Func, error) {
 	if f == nil {
 		return nil, ErrNotAFunction
 	}
-<<<<<<< HEAD
-=======
-
-	// Check if f is a function
-	funcType := reflect.TypeOf(f)
->>>>>>> main
 
 	// Check if f is a function
 	funcType := TypeOf(f)
