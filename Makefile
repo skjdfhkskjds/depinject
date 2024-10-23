@@ -15,3 +15,15 @@ test-examples:
 		echo "Running $$main..."; \
 		go run $$main || { echo "$$main failed"; exit 1; }; \
 	done
+
+# Run a specific example based on the directory name if it exists.
+run:
+	@if [ -n "$(example)" ]; then \
+		main="$(EXAMPLES_DIR)/$(example)/main.go"; \
+		if [ -f "$$main" ]; then \
+			echo "Running $$main..."; \
+			go run $$main || { echo "$$main failed"; exit 1; }; \
+		fi; \
+	else \
+		echo "Please specify an example directory using 'example' variable"; \
+	fi
