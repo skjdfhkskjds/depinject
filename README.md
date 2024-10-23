@@ -49,10 +49,6 @@ import (
     "github.com/skjdfhkskjds/depinject"
 )
 
-func NewFoo() *Foo {
-    return &Foo{}
-}
-
 func NewBar(_ *Foo) *Bar {
     return &Bar{}
 }
