@@ -28,15 +28,6 @@ func (c *Container) handleSentinelsForNode(n *node.Node) error {
 // input sentinels are treated as additional nodes whose
 // constructors are a maximal list of the struct's fields
 func (c *Container) handleIn(t reflect.Type) error {
-	// If the container does not yet have the dummy sentinel,
-	// supply it.
-	if !c.hasSentinels {
-		if err := c.supply(sentinels.InOut); err != nil {
-			return err
-		}
-		c.hasSentinels = true
-	}
-
 	s, err := reflect.NewStruct(t)
 	if err != nil {
 		return err
@@ -46,6 +37,7 @@ func (c *Container) handleIn(t reflect.Type) error {
 	if err = c.addNode(node); err != nil {
 		return err
 	}
+	c.hasSentinels = true
 
 	return nil
 }

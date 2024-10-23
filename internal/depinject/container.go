@@ -3,6 +3,7 @@ package depinject
 import (
 	"github.com/skjdfhkskjds/depinject/internal/depinject/types/errors"
 	"github.com/skjdfhkskjds/depinject/internal/depinject/types/node"
+	"github.com/skjdfhkskjds/depinject/internal/depinject/types/sentinels"
 	"github.com/skjdfhkskjds/depinject/internal/graph"
 )
 
@@ -36,6 +37,11 @@ func NewContainer() *Container {
 // node, and creating edges in the internal graph representation
 // based on the dependencies and outputs of each node.
 func (c *Container) build() error {
+	// Before building, supply the sentinel node.
+	if err := c.supply(sentinels.InOut); err != nil {
+		return err
+	}
+
 	for _, node := range c.registry.Nodes() {
 		for _, dep := range node.Dependencies() {
 			source, err := c.registry.Get(dep)
