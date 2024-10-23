@@ -26,9 +26,14 @@ func (c *Container) provide(constructor any) error {
 		return err
 	}
 
-	if err = c.graph.AddVertex(node); err != nil {
+	// Handle sentinels for the node
+	if err = c.handleSentinelsForNode(node); err != nil {
 		return err
 	}
 
+	// Add the node to the graph
+	if err = c.graph.AddVertex(node); err != nil {
+		return err
+	}
 	return c.registry.Register(node)
 }

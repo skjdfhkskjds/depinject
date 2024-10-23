@@ -8,16 +8,22 @@ import (
 
 // A Container is a dependency injection container.
 type Container struct {
+	// The internal graph representation of the container.
 	graph *graph.Graph[*node.Node]
 
+	// The node registry of the container.
 	registry *node.Registry
+
+	// Whether the container requires sentinels.
+	hasSentinels bool
 }
 
 // NewContainer creates a new container.
 func NewContainer() *Container {
 	return &Container{
-		graph:    graph.New[*node.Node](),
-		registry: node.NewRegistry(),
+		graph:        graph.New[*node.Node](),
+		registry:     node.NewRegistry(),
+		hasSentinels: false,
 	}
 }
 
