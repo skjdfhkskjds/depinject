@@ -29,14 +29,18 @@ var NewContainer = depinject.NewContainer
 // manage their own container instances.
 var c = NewContainer()
 
+// Invoke invokes the given functions with the dependencies injected
+// from the global container instance.
 func Invoke(outputs ...any) error {
 	return c.Invoke(outputs...)
 }
 
+// Provide provides the given constructors into the global container instance.
 func Provide(constructors ...any) error {
 	return c.Provide(constructors...)
 }
 
+// Supply supplies the given values into the global container instance.
 func Supply(values ...any) error {
 	return c.Supply(values...)
 }
