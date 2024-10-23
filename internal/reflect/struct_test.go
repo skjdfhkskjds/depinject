@@ -24,10 +24,10 @@ func TestNewStruct(t *testing.T) {
 		s, err := reflect.NewStruct(testStructType)
 		require.NoError(t, err)
 		require.Equal(t, "testStruct", s.Name)
-		require.Len(t, s.NamedFields, 3)
-		require.Equal(t, reflect.TypeOf(""), s.NamedFields[0])
-		require.Equal(t, reflect.TypeOf(0), s.NamedFields[1])
-		require.Equal(t, reflect.TypeOf(false), s.NamedFields[2])
+		require.Len(t, s.Fields, 3)
+		require.Equal(t, reflect.TypeOf(""), s.Fields[0])
+		require.Equal(t, reflect.TypeOf(0), s.Fields[1])
+		require.Equal(t, reflect.TypeOf(false), s.Fields[2])
 	})
 
 	t.Run("not a struct", func(t *testing.T) {
@@ -42,11 +42,12 @@ func TestStruct_Constructor(t *testing.T) {
 	require.NoError(t, err)
 
 	constructor := s.Constructor()
-	result := constructor.Call([]reflect.Value{
+	result, err := constructor.Call(
 		reflect.ValueOf("test"),
 		reflect.ValueOf(42),
 		reflect.ValueOf(true),
-	})
+	)
+	require.NoError(t, err)
 
 	require.Len(t, result, 1)
 	constructedStruct, ok := result[0].Interface().(testStruct)
