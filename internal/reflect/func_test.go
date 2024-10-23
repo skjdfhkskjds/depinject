@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/skjdfhkskjds/depinject/internal/reflect"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 const pkgPath = "github.com/skjdfhkskjds/depinject/internal/reflect_test."
@@ -88,33 +88,33 @@ func TestNewFunc(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			fn, err := reflect.NewFunc(tt.input)
-			assert.ErrorIs(
+			require.ErrorIs(
 				t, err, tt.err,
 				"NewFunc() error = %v, wantErr %v", err, tt.err,
 			)
 			if err != nil {
 				return
 			}
-			assert.Equal(
+			require.Equal(
 				t, tt.wantName, fn.Name,
 				"NewFunc() function name = %s, want %s", fn.Name, tt.wantName,
 			)
-			assert.Equal(
+			require.Equal(
 				t, len(fn.Args), tt.wantNumIn,
 				"NewFunc() number of inputs = %d, want %d", len(fn.Args), tt.wantNumIn,
 			)
-			assert.Equal(
+			require.Equal(
 				t, len(fn.Ret), tt.wantNumOut,
 				"NewFunc() number of outputs = %d, want %d", len(fn.Ret), tt.wantNumOut,
 			)
 			for i, arg := range fn.Args {
-				assert.Equal(
+				require.Equal(
 					t, tt.wantInTypes[i], arg,
 					"Input type mismatch at index %d", i,
 				)
 			}
 			for i, ret := range fn.Ret {
-				assert.Equal(
+				require.Equal(
 					t, tt.wantOutTypes[i], ret,
 					"Output type mismatch at index %d", i,
 				)
@@ -167,11 +167,11 @@ func TestFunc_Call(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got, err := tt.f.Call(tt.args...)
-			assert.ErrorIs(
+			require.ErrorIs(
 				t, err, tt.err,
 				"Func.Call() error = %v, wantErr %v", err, tt.err,
 			)
-			assert.Equal(
+			require.Equal(
 				t, len(got), len(tt.output),
 				"Func.Call() got %d return values, want %d", len(got), len(tt.output),
 			)

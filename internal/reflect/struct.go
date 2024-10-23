@@ -7,24 +7,40 @@ import (
 type Struct struct {
 	Name string
 
-	Fields []Type
+	StructType  Type
+	NamedFields []Type
 }
 
 func NewStruct(s any) (*Struct, error) {
-	t := reflect.TypeOf(s)
-	if t.Kind() != reflect.Struct {
+	t, ok := s.(Type)
+	if !ok || t.Kind() != reflect.Struct {
 		return nil, ErrNotAStruct
 	}
 
 	// Loop through each field
-	fields := make([]Type, t.NumField())
+	var fields []Type
 	for i := 0; i < t.NumField(); i++ {
 		field := t.Field(i)
-		fields[i] = TypeOf(field.Type)
+		fields = append(fields, field.Type)
 	}
 
 	return &Struct{
-		Name:   t.Name(),
-		Fields: fields,
+		Name:        t.Name(),
+		StructType:  t,
+		NamedFields: fields,
 	}, nil
+}
+
+// Constructor returns a function that constructs a new instance of the struct.
+func (s *Struct) Constructor() Value {
+	return MakeFunc(
+		reflect.FuncOf(s.NamedFields, []Type{s.StructType}, false),
+		func(args []Value) []Value {
+			structValue := reflect.New(s.StructType).Elem()
+			for i := range s.NamedFields {
+				structValue.Field(i).Set(args[i])
+			}
+			return []Value{structValue}
+		},
+	)
 }

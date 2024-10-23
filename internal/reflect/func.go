@@ -27,6 +27,10 @@ type Func struct {
 // NewFunc creates a new Func instance from the given function.
 // It returns an error if the TypeOf(f) is not a function.
 func NewFunc(f any) (*Func, error) {
+	if f == nil {
+		return nil, ErrNotAFunction
+	}
+
 	// Check if f is a function
 	funcType := TypeOf(f)
 
