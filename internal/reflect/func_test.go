@@ -2,7 +2,6 @@ package reflect_test
 
 import (
 	"errors"
-	"fmt"
 	stdreflect "reflect"
 	"testing"
 
@@ -94,7 +93,6 @@ func TestMakeNamedFunc(t *testing.T) {
 			assert.Equal(t, tt.wantNumOut, len(fn.Ret))
 			assert.Equal(t, tt.wantInTypes, fn.Args)
 			assert.Equal(t, tt.wantOutTypes, fn.Ret)
-			fmt.Println("fn.Name", fn.Name)
 			assert.Equal(t, fn.Name, tt.wantName)
 		})
 	}
