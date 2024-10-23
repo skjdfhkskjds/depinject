@@ -34,7 +34,6 @@ func TestMakeNamedFunc(t *testing.T) {
 		args         []reflect.Type
 		ret          []reflect.Type
 		fn           func([]reflect.Value) []reflect.Value
-		wantErr      bool
 		wantNumIn    int
 		wantNumOut   int
 		wantInTypes  []reflect.Type
@@ -48,7 +47,6 @@ func TestMakeNamedFunc(t *testing.T) {
 			fn: func(args []reflect.Value) []reflect.Value {
 				return []reflect.Value{reflect.ValueOf(1)}
 			},
-			wantErr:      false,
 			wantNumIn:    1,
 			wantNumOut:   1,
 			wantInTypes:  []reflect.Type{reflect.TypeOf(0)},
@@ -65,7 +63,6 @@ func TestMakeNamedFunc(t *testing.T) {
 					reflect.ValueOf(errors.New("")),
 				}
 			},
-			wantErr:     false,
 			wantNumIn:   2,
 			wantNumOut:  2,
 			wantInTypes: []reflect.Type{reflect.TypeOf(0), reflect.TypeOf(0)},
@@ -80,7 +77,6 @@ func TestMakeNamedFunc(t *testing.T) {
 			args:         []reflect.Type{},
 			ret:          []reflect.Type{},
 			fn:           nil,
-			wantErr:      false,
 			wantNumIn:    0,
 			wantNumOut:   0,
 			wantInTypes:  []reflect.Type{},
@@ -91,12 +87,7 @@ func TestMakeNamedFunc(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			fn, err := reflect.MakeNamedFunc(tt.args, tt.ret, tt.fn)
-			if tt.wantErr {
-				assert.Error(t, err)
-				return
-			}
-			assert.NoError(t, err)
+			fn := reflect.MakeNamedFunc(tt.args, tt.ret, tt.fn)
 			assert.NotNil(t, fn)
 
 			assert.Equal(t, tt.wantNumIn, len(fn.Args))
