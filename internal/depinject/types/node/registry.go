@@ -1,6 +1,7 @@
 package node
 
 import (
+	"fmt"
 	stdreflect "reflect"
 
 	"github.com/skjdfhkskjds/depinject/internal/depinject/types/errors"
@@ -48,6 +49,7 @@ func (r *Registry) Get(t reflect.Type) (*Node, error) {
 		var foundNode *Node
 		for regType, node := range r.nodes {
 			if regType.Implements(t) {
+				fmt.Println("TYPE", regType)
 				if foundNode != nil {
 					return nil, ErrMultipleImplementations
 				}

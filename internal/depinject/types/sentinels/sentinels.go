@@ -2,33 +2,56 @@ package sentinels
 
 import "reflect"
 
-var InOut = &S{}
-
 type (
-	In  interface{ in() }
-	Out interface{ out() }
+	// Note: Embedding the sentinels needs to be at the top level
+	// of the struct, we do not check recursively.
+	In  struct{ _ sentinel }
+	Out struct{ _ sentinel }
 
 	// internal implementation to use for container resolution
-	S struct{}
+	sentinel struct{}
 )
 
-func (*S) in()  {}
-func (*S) out() {}
-
-// ImplementsIn returns true if the given reflect.Type implements the In interface.
-// It returns false if the type is nil or exactly the In interface itself.
-func ImplementsIn(t reflect.Type) bool {
-	if t == nil || t == reflect.TypeOf((*In)(nil)).Elem() {
+// EmbedsIn returns true if the given reflect.Type implements the In interface.
+// It returns false if the type is nil or exactly the In type itself.
+func EmbedsIn(t reflect.Type) bool {
+	if t == nil || t == reflect.TypeOf(In{}) {
 		return false
 	}
-	return t.Implements(reflect.TypeOf((*In)(nil)).Elem())
+
+	// Check if the type is a struct
+	if t.Kind() != reflect.Struct {
+		return false
+	}
+
+	// Iterate through all fields of the struct
+	for i := 0; i < t.NumField(); i++ {
+		if t.Field(i).Type == reflect.TypeOf(In{}) {
+			return true
+		}
+	}
+
+	return false
 }
 
-// ImplementsOut returns true if the given reflect.Type implements the Out interface.
-// It returns false if the type is nil or exactly the Out interface itself.
-func ImplementsOut(t reflect.Type) bool {
-	if t == nil || t == reflect.TypeOf((*Out)(nil)).Elem() {
+// EmbedsOut returns true if the given reflect.Type embeds the Out type.
+// It returns false if the type is nil or exactly the Out type itself.
+func EmbedsOut(t reflect.Type) bool {
+	if t == nil || t == reflect.TypeOf(Out{}) {
 		return false
 	}
-	return t.Implements(reflect.TypeOf((*Out)(nil)).Elem())
+
+	// Check if the type is a struct
+	if t.Kind() != reflect.Struct {
+		return false
+	}
+
+	// Iterate through all fields of the struct
+	for i := 0; i < t.NumField(); i++ {
+		if t.Field(i).Type == reflect.TypeOf(Out{}) {
+			return true
+		}
+	}
+
+	return false
 }

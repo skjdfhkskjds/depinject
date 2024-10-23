@@ -10,7 +10,7 @@ import (
 // sentinels as new nodes into the container.
 func (c *Container) handleSentinelsForNode(n *node.Node) error {
 	for _, dep := range n.Dependencies() {
-		if !sentinels.ImplementsIn(dep) {
+		if !sentinels.EmbedsIn(dep) {
 			continue
 		}
 		if err := c.handleIn(dep); err != nil {
@@ -37,7 +37,7 @@ func (c *Container) handleIn(t reflect.Type) error {
 	if err = c.addNode(node); err != nil {
 		return err
 	}
-	c.hasSentinels = true
+	c.hasIn = true
 
 	return nil
 }

@@ -1,6 +1,7 @@
 package node
 
 import (
+	"fmt"
 	stdreflect "reflect"
 
 	"github.com/skjdfhkskjds/depinject/internal/graph"
@@ -79,6 +80,8 @@ func (n *Node) ValueOf(t reflect.Type) (reflect.Value, error) {
 				if impl != nil {
 					return reflect.Value{}, ErrMultipleImplementations
 				}
+
+				fmt.Println("OUTPUT", output)
 				impl = output
 			}
 		}

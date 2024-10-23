@@ -21,15 +21,17 @@ type Container struct {
 	registry *node.Registry
 
 	// Whether the container requires sentinels.
-	hasSentinels bool
+	hasIn  bool
+	hasOut bool
 }
 
 // NewContainer creates a new container.
 func NewContainer() *Container {
 	return &Container{
-		graph:        graph.New[*node.Node](),
-		registry:     node.NewRegistry(),
-		hasSentinels: false,
+		graph:    graph.New[*node.Node](),
+		registry: node.NewRegistry(),
+		hasIn:    false,
+		hasOut:   false,
 	}
 }
 
@@ -37,9 +39,16 @@ func NewContainer() *Container {
 // node, and creating edges in the internal graph representation
 // based on the dependencies and outputs of each node.
 func (c *Container) build() error {
-	// Before building, supply the sentinel node.
-	if err := c.supply(sentinels.InOut); err != nil {
-		return err
+	// Before building, supply the sentinels.
+	if c.hasIn {
+		if err := c.supply(sentinels.In{}); err != nil {
+			return err
+		}
+	}
+	if c.hasOut {
+		if err := c.supply(sentinels.Out{}); err != nil {
+			return err
+		}
 	}
 
 	for _, node := range c.registry.Nodes() {
