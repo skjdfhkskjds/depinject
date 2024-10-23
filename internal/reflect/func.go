@@ -4,12 +4,13 @@ import (
 	"errors"
 	"reflect"
 	"runtime"
+	"strings"
 )
 
 const (
 	generatedFuncNamePrefix     = "GeneratedFunc"
 	generatedFuncNameArgsPrefix = "Args"
-	generatedFuncNameRetPrefix  = "Ret"
+	generatedFuncNameRetPrefix  = "Returns"
 )
 
 // A Func is a wrapper around a reflect function value that
@@ -36,14 +37,9 @@ type Func struct {
 // and returns the given return values. It assigns this function a name
 // which is formatted as "GeneratedFuncArgs{argTypes...}Ret{retTypes...}".
 func MakeNamedFunc(args []Type, ret []Type, fn func([]Value) []Value) *Func {
-	name := generatedFuncNamePrefix + generatedFuncNameArgsPrefix
-	for _, argType := range args {
-		name += argType.String()
-	}
-	name += generatedFuncNameRetPrefix
-	for _, retType := range ret {
-		name += retType.String()
-	}
+	name := generatedFuncNamePrefix +
+		"(" + formatList(generatedFuncNameArgsPrefix, args) +
+		formatList(generatedFuncNameRetPrefix, ret) + ")"
 
 	return &Func{
 		Name: name,
@@ -118,4 +114,12 @@ func (f *Func) Call(args ...any) ([]Value, error) {
 	}
 
 	return res, nil
+}
+
+func formatList(prefix string, list []reflect.Type) string {
+	types := make([]string, len(list))
+	for i, t := range list {
+		types[i] = t.String()
+	}
+	return prefix + "{" + strings.Join(types, ", ") + "}"
 }
