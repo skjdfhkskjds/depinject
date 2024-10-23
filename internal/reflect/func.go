@@ -49,7 +49,7 @@ func MakeNamedFunc(args []Type, ret []Type, fn func([]Value) []Value) *Func {
 		Name: name,
 		Args: args,
 		Ret:  ret,
-		fn:   reflect.MakeFunc(reflect.FuncOf(nil, ret, false), fn),
+		fn:   reflect.MakeFunc(reflect.FuncOf(args, ret, false), fn),
 	}
 }
 
