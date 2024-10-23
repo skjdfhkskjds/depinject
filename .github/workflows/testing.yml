@@ -1,4 +1,4 @@
-name: Testing
+name: testing
 
 on:
   push:
@@ -22,7 +22,7 @@ jobs:
     - name: Set up Go
       uses: actions/setup-go@v4
       with:
-        go-version: '1.20' # You can adjust this version as per your Go setup
+        go-version: '1.23.2'
 
     # Step 3: Cache Go modules
     - name: Cache Go modules
@@ -56,7 +56,7 @@ jobs:
     - name: Set up Go
       uses: actions/setup-go@v4
       with:
-        go-version: '1.20'
+        go-version: '1.23.2'
 
     # Step 3: Cache Go modules
     - name: Cache Go modules
