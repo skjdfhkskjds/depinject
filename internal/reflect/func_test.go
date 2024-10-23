@@ -50,7 +50,7 @@ func TestMakeNamedFunc(t *testing.T) {
 			wantNumOut:   1,
 			wantInTypes:  []reflect.Type{reflect.TypeOf(0)},
 			wantOutTypes: []reflect.Type{reflect.TypeOf(1)},
-			wantName:     "GeneratedFuncArgsintRetint",
+			wantName:     "GeneratedFunc(Args{int}Returns{int})",
 		},
 		{
 			name: "valid function with two inputs and two outputs",
@@ -69,7 +69,7 @@ func TestMakeNamedFunc(t *testing.T) {
 				reflect.TypeOf(0),
 				reflect.TypeOf(errors.New("")),
 			},
-			wantName: "GeneratedFuncArgsintintRetint*errors.errorString",
+			wantName: "GeneratedFunc(Args{int, int}Returns{int, *errors.errorString})",
 		},
 		{
 			name:         "no inputs and no outputs",
@@ -80,7 +80,7 @@ func TestMakeNamedFunc(t *testing.T) {
 			wantNumOut:   0,
 			wantInTypes:  []reflect.Type{},
 			wantOutTypes: []reflect.Type{},
-			wantName:     "GeneratedFuncArgsRet",
+			wantName:     "GeneratedFunc(Args{}Returns{})",
 		},
 	}
 
