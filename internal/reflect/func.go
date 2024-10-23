@@ -35,7 +35,7 @@ type Func struct {
 // It generates a function which when called consumes the specified args
 // and returns the given return values. It assigns this function a name
 // which is formatted as "GeneratedFuncArgs{argTypes...}Ret{retTypes...}".
-func MakeNamedFunc(args []Type, ret []Type, fn func([]Value) []Value) (*Func, error) {
+func MakeNamedFunc(args []Type, ret []Type, fn func([]Value) []Value) *Func {
 	name := generatedFuncNamePrefix + generatedFuncNameArgsPrefix
 	for _, argType := range args {
 		name += argType.String()
@@ -50,7 +50,7 @@ func MakeNamedFunc(args []Type, ret []Type, fn func([]Value) []Value) (*Func, er
 		Args: args,
 		Ret:  ret,
 		fn:   reflect.MakeFunc(reflect.FuncOf(nil, ret, false), fn),
-	}, nil
+	}
 }
 
 // WrapFunc wraps an existing go function into a Func instance.

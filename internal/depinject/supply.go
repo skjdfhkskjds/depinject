@@ -23,19 +23,16 @@ func (c *Container) Supply(values ...any) error {
 
 func (c *Container) supply(value any) error {
 	// Generate a function that returns the supplied value
-	fn, err := reflect.MakeNamedFunc(
+	fn := reflect.MakeNamedFunc(
 		nil,
 		[]reflect.Type{reflect.TypeOf(value)},
 		func(args []reflect.Value) []reflect.Value {
 			return []reflect.Value{reflect.ValueOf(value)}
 		},
 	)
-	if err != nil {
-		return errors.New(err, supplyErrorName, reflect.TypeOf(value).String())
-	}
 
 	node := node.NewFromFunc(fn)
-	if err = c.addNode(node); err != nil {
+	if err := c.addNode(node); err != nil {
 		return errors.New(err, supplyErrorName, reflect.TypeOf(value).String())
 	}
 
