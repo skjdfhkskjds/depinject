@@ -7,7 +7,7 @@ import (
 	"github.com/skjdfhkskjds/depinject/internal/reflect"
 )
 
-var _ graph.Vertex[*Node] = (*Node)(nil)
+var _ graph.Vertex = (*Node)(nil)
 
 // Node is a Node in the graph.
 type Node struct {

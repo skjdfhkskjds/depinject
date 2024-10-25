@@ -1,7 +1,7 @@
 package graph
 
 // Vertex represents a vertex in a graph.
-type Vertex[T any] interface {
+type Vertex interface {
 	// ID returns the unique identifier for the vertex.
 	ID() string
 }
