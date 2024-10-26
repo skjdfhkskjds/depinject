@@ -1,33 +1,29 @@
-package main
+package examples
 
 import (
+	"testing"
+
 	"github.com/skjdfhkskjds/depinject"
-	"github.com/skjdfhkskjds/depinject/examples"
+	"github.com/stretchr/testify/require"
 )
 
 // This example is identical to the basic example but supplies
 // multiple values into the container instead.
 
-func main() {
+func TestWithMultiSupply(t *testing.T) {
 	container := depinject.NewContainer()
 
 	// Supply a value into the container directly.
-	if err := container.Supply(&examples.Foo{}, &examples.Bar{}); err != nil {
-		panic(err)
-	}
+	require.NoError(t, container.Supply(&Foo{}, &Bar{}))
 
 	// Provide a set of constructors into the container.
-	if err := container.Provide(
-		examples.NewFooBar,
-	); err != nil {
-		panic(err)
-	}
+	require.NoError(t, container.Provide(
+		NewFooBar,
+	))
 
 	// Invoke a function with the dependencies injected
 	// to retrieve the FooBar instance.
-	var fooBar *examples.FooBar
-	if err := container.Invoke(&fooBar); err != nil {
-		panic(err)
-	}
+	var fooBar *FooBar
+	require.NoError(t, container.Invoke(&fooBar))
 	fooBar.Print()
 }
