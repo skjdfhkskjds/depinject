@@ -15,7 +15,7 @@ const (
 // A Container is a dependency injection container.
 type Container struct {
 	// The internal graph representation of the container.
-	graph *graph.Graph[*node.Node]
+	graph *graph.DAG[*node.Node]
 
 	// The node registry of the container.
 	registry *node.Registry
@@ -28,7 +28,7 @@ type Container struct {
 // NewContainer creates a new container.
 func NewContainer() *Container {
 	return &Container{
-		graph:    graph.New[*node.Node](),
+		graph:    graph.NewDAG[*node.Node](),
 		registry: node.NewRegistry(),
 		hasIn:    false,
 		hasOut:   false,
