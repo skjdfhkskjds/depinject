@@ -23,6 +23,7 @@ func New(constructor any) (*Node, error) {
 	if err != nil {
 		return nil, err
 	}
+	fn.Ret = filterError(fn.Ret)
 
 	return &Node{
 		id:          fn.Name,
@@ -33,6 +34,7 @@ func New(constructor any) (*Node, error) {
 
 // NewFromFunc creates a new node from a reflect.Func.
 func NewFromFunc(fn *reflect.Func) *Node {
+	fn.Ret = filterError(fn.Ret)
 	return &Node{
 		id:          fn.Name,
 		outputs:     make(map[reflect.Type]reflect.Value),
@@ -77,7 +79,7 @@ func (n *Node) ValueOf(t reflect.Type) (reflect.Value, error) {
 		for _, output := range n.Outputs() {
 			if output.Implements(t) {
 				if impl != nil {
-					return reflect.Value{}, ErrMultipleImplementations
+					return reflect.Value{}, ErrMultipleImplementations(t)
 				}
 				impl = output
 			}
@@ -87,10 +89,20 @@ func (n *Node) ValueOf(t reflect.Type) (reflect.Value, error) {
 		}
 	}
 
-	return reflect.Value{}, ErrValueNotFound
+	return reflect.Value{}, ErrValueNotFound(t)
 }
 
 // ID returns the ID of the node.
 func (n *Node) ID() string {
 	return n.id
+}
+
+func filterError(types []reflect.Type) []reflect.Type {
+	var ret []reflect.Type
+	for _, t := range types {
+		if t != reflect.TypeOf((*error)(nil)).Elem() {
+			ret = append(ret, t)
+		}
+	}
+	return ret
 }
