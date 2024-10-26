@@ -1,8 +1,10 @@
-package main
+package examples
 
 import (
+	"testing"
+
 	"github.com/skjdfhkskjds/depinject"
-	"github.com/skjdfhkskjds/depinject/examples"
+	"github.com/stretchr/testify/require"
 )
 
 // This example demonstrates how to use the dependency injection
@@ -16,23 +18,19 @@ import (
 // We supply the constructors for Foo, Bar and FooBar into the container
 // and request an instance of FooBarI.
 
-func main() {
+func TestWithInterfaces(t *testing.T) {
 	container := depinject.NewContainer()
 
 	// Provide a set of constructors into the container.
-	if err := container.Provide(
-		examples.NewFoo,
-		examples.NewBar,
-		examples.NewFooBarWithBarI,
-	); err != nil {
-		panic(err)
-	}
+	require.NoError(t, container.Provide(
+		NewFoo,
+		NewBar,
+		NewFooBarWithBarI,
+	))
 
 	// Invoke a function with the dependencies injected
 	// to retrieve the FooBar instance.
-	var fooBar examples.FooBarI
-	if err := container.Invoke(&fooBar); err != nil {
-		panic(err)
-	}
+	var fooBar FooBarI
+	require.NoError(t, container.Invoke(&fooBar))
 	fooBar.Print()
 }

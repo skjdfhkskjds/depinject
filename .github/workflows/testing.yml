@@ -41,7 +41,7 @@ jobs:
 
     # Step 5: Run the integration tests
     - name: Run integration tests
-      run: make test-examples
+      run: make test-integration
 
   # Job 2: Run unit tests
   unit-tests:

@@ -28,13 +28,7 @@ $ cd depinject
 To run the project and see the dependency injection in action:
 
 ```bash
-$ go run ./example/basic
-```
-
-or run
-
-```bash
-$ make run example=basic
+$ go test ./examples/basic_test.go
 ```
 
 ## Example Usage
