@@ -1,9 +1,5 @@
 package graph
 
-import (
-	"errors"
-)
-
 type DAG[VertexT Vertex] struct {
 	vertices map[string]VertexT
 	edges    map[string][]VertexT
@@ -20,25 +16,27 @@ func NewDAG[VertexT Vertex]() *DAG[VertexT] {
 }
 
 // AddVertex adds a new vertex to the DAG.
-func (g *DAG[VertexT]) AddVertex(vertex VertexT) error {
-	if _, exists := g.vertices[vertex.ID()]; !exists {
-		g.vertices[vertex.ID()] = vertex
-		g.indegree[vertex.ID()] = 0
-		return nil
+func (g *DAG[VertexT]) AddVertex(v VertexT) error {
+	if g.hasVertex(v) {
+		return ErrVertexAlreadyExists
 	}
-	return ErrVertexAlreadyExists
+
+	g.vertices[v.ID()] = v
+	g.indegree[v.ID()] = 0
+	return nil
 }
 
 // AddEdge adds a directed edge from vertex 'from' to vertex 'to'.
 // Returns an error if adding the edge would create a cycle.
 func (g *DAG[VertexT]) AddEdge(from, to VertexT) error {
 	// Ensure both vertices exist
-	g.AddVertex(from)
-	g.AddVertex(to)
+	if !g.hasVertex(from) || !g.hasVertex(to) {
+		return ErrVertexNotFound
+	}
 
 	// Check if adding the edge would create a cycle
 	if g.hasCycle(from, to) {
-		return errors.New("adding this edge would create a cycle")
+		return ErrAcyclicConstraintViolation
 	}
 
 	// Add the edge and update indegree of the destination vertex
@@ -67,7 +65,8 @@ func (g *DAG[VertexT]) TopologicalSort() ([]VertexT, error) {
 		queue = queue[1:]
 		sorted = append(sorted, g.vertices[v])
 
-		// For each outgoing edge from 'v', reduce indegree and enqueue if it becomes zero
+		// For each outgoing edge from 'v', reduce indegree and
+		// enqueue if it becomes zero
 		for _, neighbor := range g.edges[v] {
 			g.indegree[neighbor.ID()]--
 			if g.indegree[neighbor.ID()] == 0 {
@@ -91,7 +90,9 @@ func (g *DAG[VertexT]) hasCycle(from, to VertexT) bool {
 
 // detectCycle is a helper function which returns if there is a cycle
 // via DFS.
-func (g *DAG[VertexT]) detectCycle(v, target VertexT, visited map[string]bool) bool {
+func (g *DAG[VertexT]) detectCycle(
+	v, target VertexT, visited map[string]bool,
+) bool {
 	if v.ID() == target.ID() {
 		return true
 	}
@@ -105,4 +106,10 @@ func (g *DAG[VertexT]) detectCycle(v, target VertexT, visited map[string]bool) b
 	}
 	visited[v.ID()] = false
 	return false
+}
+
+// hasVertex returns whether the given vertex exists in the DAG.
+func (g *DAG[VertexT]) hasVertex(v VertexT) bool {
+	_, exists := g.vertices[v.ID()]
+	return exists
 }

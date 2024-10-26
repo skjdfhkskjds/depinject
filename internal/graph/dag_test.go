@@ -38,12 +38,17 @@ func TestDAG(t *testing.T) {
 		v1 := testVertex{id: "1"}
 		v2 := testVertex{id: "2"}
 
-		err := dag.AddEdge(v1, v2)
+		err := dag.AddVertex(v1)
+		assert.NoError(t, err)
+		err = dag.AddVertex(v2)
+		assert.NoError(t, err)
+
+		err = dag.AddEdge(v1, v2)
 		assert.NoError(t, err)
 
 		// Adding an edge that would create a cycle should return an error
 		err = dag.AddEdge(v2, v1)
-		assert.ErrorContains(t, err, graph.ErrAcyclicConstraintViolation.Error())
+		assert.ErrorIs(t, err, graph.ErrAcyclicConstraintViolation)
 	})
 
 	t.Run("TopologicalSort", func(t *testing.T) {
@@ -51,6 +56,10 @@ func TestDAG(t *testing.T) {
 		v1 := testVertex{id: "1"}
 		v2 := testVertex{id: "2"}
 		v3 := testVertex{id: "3"}
+
+		require.NoError(t, dag.AddVertex(v1))
+		require.NoError(t, dag.AddVertex(v2))
+		require.NoError(t, dag.AddVertex(v3))
 
 		require.NoError(t, dag.AddEdge(v1, v2))
 		require.NoError(t, dag.AddEdge(v2, v3))
