@@ -1,7 +1,6 @@
 package graph
 
 import (
-	"fmt"
 	"strconv"
 	"testing"
 )
@@ -128,7 +127,7 @@ func BenchmarkTopologicalSortComplex(b *testing.B) {
 	numVertices := 100
 	vertices := make([]testVertex, numVertices)
 	for i := 0; i < numVertices; i++ {
-		vertices[i] = testVertex{id: fmt.Sprintf("%d", i)}
+		vertices[i] = testVertex{id: strconv.Itoa(i)}
 		dag.AddVertex(vertices[i])
 	}
 
