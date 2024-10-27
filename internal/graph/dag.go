@@ -1,17 +1,19 @@
 package graph
 
 type DAG[VertexT Vertex] struct {
-	vertices map[string]VertexT
-	edges    map[string][]VertexT
-	indegree map[string]int
+	vertices  map[string]VertexT
+	edges     map[string][]VertexT
+	indegree  map[string]int
+	ancestors map[string]map[string]struct{}
 }
 
 // NewDAG creates a new empty DAG.
 func NewDAG[VertexT Vertex]() *DAG[VertexT] {
 	return &DAG[VertexT]{
-		vertices: make(map[string]VertexT),
-		edges:    make(map[string][]VertexT),
-		indegree: make(map[string]int),
+		vertices:  make(map[string]VertexT),
+		edges:     make(map[string][]VertexT),
+		indegree:  make(map[string]int),
+		ancestors: make(map[string]map[string]struct{}),
 	}
 }
 
@@ -39,9 +41,10 @@ func (g *DAG[VertexT]) AddEdge(from, to VertexT) error {
 		return ErrAcyclicConstraintViolation
 	}
 
-	// Add the edge and update indegree of the destination vertex
+	// Add the edge and update indegree and ancestors of the destination vertex
 	g.edges[from.ID()] = append(g.edges[from.ID()], to)
 	g.indegree[to.ID()]++
+	g.updateAncestors(from, to)
 	return nil
 }
 
@@ -82,34 +85,33 @@ func (g *DAG[VertexT]) TopologicalSort() ([]VertexT, error) {
 	return sorted, nil
 }
 
-// Helper function to check if adding an edge would create a cycle using DFS.
+// hasCycle returns whether adding the edge from 'from' to 'to' would create a
+// cycle by querying 'from's ancestors.
 func (g *DAG[VertexT]) hasCycle(from, to VertexT) bool {
-	visited := make(map[string]bool)
-	return g.detectCycle(to, from, visited)
-}
-
-// detectCycle is a helper function which returns if there is a cycle
-// via DFS.
-func (g *DAG[VertexT]) detectCycle(
-	v, target VertexT, visited map[string]bool,
-) bool {
-	if v.ID() == target.ID() {
-		return true
+	var exists bool
+	if _, exists = g.ancestors[from.ID()]; !exists {
+		return false
 	}
-	visited[v.ID()] = true
-	for _, neighbor := range g.edges[v.ID()] {
-		if !visited[neighbor.ID()] {
-			if g.detectCycle(neighbor, target, visited) {
-				return true
-			}
-		}
-	}
-	visited[v.ID()] = false
-	return false
+	_, exists = g.ancestors[from.ID()][to.ID()]
+	return exists
 }
 
 // hasVertex returns whether the given vertex exists in the DAG.
 func (g *DAG[VertexT]) hasVertex(v VertexT) bool {
 	_, exists := g.vertices[v.ID()]
 	return exists
+}
+
+// updateAncestors updates the ancestors of 'to' to include 'from' and the
+// ancestors of 'from'.
+func (g *DAG[VertexT]) updateAncestors(from, to VertexT) {
+	// lazily initialize the ancestors inner map as needed
+	if _, exists := g.ancestors[to.ID()]; !exists {
+		g.ancestors[to.ID()] = make(map[string]struct{})
+	}
+	// add from.ancestors and from to to.ancestors
+	for ancestor := range g.ancestors[from.ID()] {
+		g.ancestors[to.ID()][ancestor] = struct{}{}
+	}
+	g.ancestors[to.ID()][from.ID()] = struct{}{}
 }
