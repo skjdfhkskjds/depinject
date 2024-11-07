@@ -7,6 +7,9 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+// This example demonstrates how to use the dependency injection
+// framework to inject variadic arguments into a function.
+
 func NewFooBarVariadic(foo *Foo, bars ...*Bar) *FooBar {
 	return &FooBar{}
 }
