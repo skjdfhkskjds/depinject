@@ -36,3 +36,43 @@ func TestBasic(t *testing.T) {
 	require.NoError(t, container.Invoke(&fooBar))
 	fooBar.Print()
 }
+
+// This is the same as the basic example, except that we do not
+// create an explicit instance of the container.
+func TestBasicNoInstance(t *testing.T) {
+	// Supply a value into the container directly.
+	require.NoError(t, depinject.Supply(&Foo{}))
+
+	// Provide a set of constructors into the container.
+	require.NoError(t, depinject.Provide(
+		NewBar,
+		NewFooBar,
+	))
+
+	// Invoke a function with the dependencies injected
+	// to retrieve the FooBar instance.
+	var fooBar *FooBar
+	require.NoError(t, depinject.Invoke(&fooBar))
+	fooBar.Print()
+}
+
+// This example is identical to the basic example but supplies
+// multiple values into the container instead.
+
+func TestBasicMultiSupply(t *testing.T) {
+	container := depinject.NewContainer()
+
+	// Supply a value into the container directly.
+	require.NoError(t, container.Supply(&Foo{}, &Bar{}))
+
+	// Provide a set of constructors into the container.
+	require.NoError(t, container.Provide(
+		NewFooBar,
+	))
+
+	// Invoke a function with the dependencies injected
+	// to retrieve the FooBar instance.
+	var fooBar *FooBar
+	require.NoError(t, container.Invoke(&fooBar))
+	fooBar.Print()
+}
