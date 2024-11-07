@@ -17,6 +17,14 @@ func add1(a int) int {
 	return a + 1
 }
 
+func addMulti(nums ...int) int {
+	sum := 0
+	for _, v := range nums {
+		sum += v
+	}
+	return sum
+}
+
 var errDivisionByZero = errors.New("division by zero")
 
 func divide(a, b int) (int, error) {
@@ -101,24 +109,26 @@ func TestMakeNamedFunc(t *testing.T) {
 // TestWrapFunc tests the creation of a new Func instance.
 func TestWrapFunc(t *testing.T) {
 	tests := []struct {
-		name         string
-		input        any
-		err          error
-		wantNumIn    int
-		wantNumOut   int
-		wantInTypes  []reflect.Type
-		wantOutTypes []reflect.Type
-		wantName     string
+		name           string
+		input          any
+		err            error
+		wantNumIn      int
+		wantNumOut     int
+		wantInTypes    []reflect.Type
+		wantOutTypes   []reflect.Type
+		wantName       string
+		wantIsVariadic bool
 	}{
 		{
-			name:         "valid function with one input and one output",
-			input:        add1,
-			err:          nil,
-			wantNumIn:    1,
-			wantNumOut:   1,
-			wantInTypes:  []reflect.Type{reflect.TypeOf(0)},
-			wantOutTypes: []reflect.Type{reflect.TypeOf(0)},
-			wantName:     pkgPath + "add1",
+			name:           "valid function with one input and one output",
+			input:          add1,
+			err:            nil,
+			wantNumIn:      1,
+			wantNumOut:     1,
+			wantInTypes:    []reflect.Type{reflect.TypeOf(0)},
+			wantOutTypes:   []reflect.Type{reflect.TypeOf(0)},
+			wantName:       pkgPath + "add1",
+			wantIsVariadic: false,
 		},
 		{
 			name:       "valid function with two inputs and two outputs",
@@ -134,27 +144,41 @@ func TestWrapFunc(t *testing.T) {
 				reflect.TypeOf(0),
 				reflect.TypeOf((*error)(nil)).Elem(),
 			},
-			wantName: pkgPath + "divide",
+			wantName:       pkgPath + "divide",
+			wantIsVariadic: false,
 		},
 		{
-			name:         "nil input",
-			input:        nil,
-			err:          reflect.ErrNotAFunction,
-			wantNumIn:    0,
-			wantNumOut:   0,
-			wantInTypes:  nil,
-			wantOutTypes: nil,
-			wantName:     "",
+			name:           "nil input",
+			input:          nil,
+			err:            reflect.ErrNotAFunction,
+			wantNumIn:      0,
+			wantNumOut:     0,
+			wantInTypes:    nil,
+			wantOutTypes:   nil,
+			wantName:       "",
+			wantIsVariadic: false,
 		},
 		{
-			name:         "non-function input",
-			input:        42,
-			err:          reflect.ErrNotAFunction,
-			wantNumIn:    0,
-			wantNumOut:   0,
-			wantInTypes:  nil,
-			wantOutTypes: nil,
-			wantName:     "",
+			name:           "non-function input",
+			input:          42,
+			err:            reflect.ErrNotAFunction,
+			wantNumIn:      0,
+			wantNumOut:     0,
+			wantInTypes:    nil,
+			wantOutTypes:   nil,
+			wantName:       "",
+			wantIsVariadic: false,
+		},
+		{
+			name:           "variadic function",
+			input:          addMulti,
+			err:            nil,
+			wantNumIn:      1,
+			wantNumOut:     1,
+			wantInTypes:    []reflect.Type{reflect.TypeOf([]int{})},
+			wantOutTypes:   []reflect.Type{reflect.TypeOf(0)},
+			wantName:       pkgPath + "addMulti",
+			wantIsVariadic: true,
 		},
 	}
 
