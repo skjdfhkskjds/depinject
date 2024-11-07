@@ -11,7 +11,11 @@ func NewFooBarVariadic(foo *Foo, bars ...*Bar) *FooBar {
 	return &FooBar{}
 }
 
-func TestWithVariadic(t *testing.T) {
+func NewMultiBar() []*Bar {
+	return []*Bar{{}, {}}
+}
+
+func TestWithVariadicNoArgs(t *testing.T) {
 	container := depinject.NewContainer()
 
 	require.NoError(t, container.Supply(&Foo{}))
@@ -20,4 +24,18 @@ func TestWithVariadic(t *testing.T) {
 	var fooBar *FooBar
 	require.NoError(t, container.Invoke(&fooBar))
 	fooBar.Print()
+}
+
+func TestWithVariadicOneArg(t *testing.T) {
+	container := depinject.NewContainer()
+
+	require.NoError(t, container.Supply(&Foo{}, &Bar{}))
+	require.NoError(t, container.Provide(NewFooBarVariadic))
+}
+
+func TestWithVariadicMultipleArgs(t *testing.T) {
+	container := depinject.NewContainer()
+
+	require.NoError(t, container.Supply(&Foo{}))
+	require.NoError(t, container.Provide(NewMultiBar, NewFooBarVariadic))
 }
