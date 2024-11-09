@@ -47,6 +47,11 @@ func (n *Node) Dependencies() []reflect.Type {
 	return n.constructor.Args
 }
 
+// IsVariadic returns true if the node's constructor is variadic.
+func (n *Node) IsVariadic() bool {
+	return n.constructor.IsVariadic
+}
+
 // Outputs returns the outputs of the node.
 func (n *Node) Outputs() []reflect.Type {
 	return n.constructor.Ret

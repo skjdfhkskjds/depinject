@@ -27,6 +27,9 @@ type Func struct {
 	// Ret is the return types of the function.
 	Ret []Type
 
+	// IsVariadic is true if the function is variadic.
+	IsVariadic bool
+
 	// fn is the executable Value of the function.
 	fn Value
 }
@@ -42,10 +45,11 @@ func MakeNamedFunc(args []Type, ret []Type, fn func([]Value) []Value) *Func {
 		formatList(generatedFuncNameRetPrefix, ret) + ")"
 
 	return &Func{
-		Name: name,
-		Args: args,
-		Ret:  ret,
-		fn:   reflect.MakeFunc(reflect.FuncOf(args, ret, false), fn),
+		Name:       name,
+		Args:       args,
+		Ret:        ret,
+		IsVariadic: false,
+		fn:         reflect.MakeFunc(reflect.FuncOf(args, ret, false), fn),
 	}
 }
 
@@ -66,10 +70,11 @@ func WrapFunc(f any) (*Func, error) {
 
 	// Create a new Func instance
 	fn := &Func{
-		Name: runtime.FuncForPC(ValueOf(f).Pointer()).Name(),
-		Args: make([]Type, funcType.NumIn()),
-		Ret:  make([]Type, funcType.NumOut()),
-		fn:   ValueOf(f),
+		Name:       runtime.FuncForPC(ValueOf(f).Pointer()).Name(),
+		Args:       make([]Type, funcType.NumIn()),
+		Ret:        make([]Type, funcType.NumOut()),
+		IsVariadic: funcType.IsVariadic(),
+		fn:         ValueOf(f),
 	}
 
 	// Extract argument types
@@ -87,7 +92,9 @@ func WrapFunc(f any) (*Func, error) {
 
 // Call calls the original function with the given arguments.
 func (f *Func) Call(args ...any) ([]Value, error) {
-	if len(args) != len(f.Args) {
+	// TODO: clean up this mess from variadic function arg checking.
+	// also in internal/depinject/container.go
+	if len(args) != len(f.Args) && !(f.IsVariadic && len(args) == len(f.Args)-1) {
 		return nil, ErrWrongNumArgs
 	}
 

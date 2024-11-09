@@ -52,9 +52,13 @@ func (c *Container) build() error {
 	}
 
 	for _, node := range c.registry.Nodes() {
-		for _, dep := range node.Dependencies() {
+		for i, dep := range node.Dependencies() {
 			source, err := c.registry.Get(dep)
-			if err != nil {
+			// If the last dependency is not found, and the node is variadic,
+			// we continue without error.
+			if err != nil && node.IsVariadic() && i == len(node.Dependencies())-1 {
+				continue
+			} else if err != nil {
 				return errors.New(err, buildErrorName, node.ID(), dep.Name())
 			}
 
@@ -81,10 +85,14 @@ func (c *Container) resolve() error {
 		// Get the dependencies of the node.
 		depTypes := node.Dependencies()
 		deps := make([]any, 0, len(depTypes))
-		for _, dep := range depTypes {
+		for i, dep := range depTypes {
 			source, err := c.registry.Get(dep)
-			if err != nil {
-				return errors.New(err, resolveErrorName, node.ID(), dep.Name())
+			// If the last dependency is not found, and the node is variadic,
+			// we continue without error.
+			if err != nil && node.IsVariadic() && i == len(node.Dependencies())-1 {
+				continue
+			} else if err != nil {
+				return errors.New(err, buildErrorName, node.ID(), dep.Name())
 			}
 
 			value, err := source.ValueOf(dep)
