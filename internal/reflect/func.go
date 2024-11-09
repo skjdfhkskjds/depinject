@@ -94,7 +94,7 @@ func WrapFunc(f any) (*Func, error) {
 func (f *Func) Call(args ...any) ([]Value, error) {
 	// TODO: clean up this mess from variadic function arg checking.
 	// also in internal/depinject/container.go
-	if len(args) != len(f.Args) || (f.IsVariadic && len(args) != len(f.Args)-1) {
+	if len(args) != len(f.Args) && !(f.IsVariadic && len(args) == len(f.Args)-1) {
 		return nil, ErrWrongNumArgs
 	}
 
