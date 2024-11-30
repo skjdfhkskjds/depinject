@@ -11,4 +11,6 @@ var (
 	TypeOf   = reflect.TypeOf
 	ValueOf  = reflect.ValueOf
 	MakeFunc = reflect.MakeFunc
+
+	Interface = reflect.Interface
 )
