@@ -1,14 +1,13 @@
 package depinject
 
-type Option func(*Container) *Container
+type Option func(*Container)
 
 // Instructs the container to enable the use of sentinel
 // structs in constructor arguments and parses the struct's
 // fields as constructor arguments.
-func UseInSentinel() Option {
-	return func(c *Container) *Container {
+func WithInSentinel() Option {
+	return func(c *Container) {
 		c.useInSentinel = true
-		return c
 	}
 }
 
@@ -16,27 +15,24 @@ func UseInSentinel() Option {
 // structs in constructor outputs and parses the struct's
 // fields as constructor outputs.
 // TODO: Not implemented yet.
-func UseOutSentinel() Option {
-	return func(c *Container) *Container {
+func WithOutSentinel() Option {
+	return func(c *Container) {
 		c.useOutSentinel = true
-		return c
 	}
 }
 
 // Allows the container to match dependencies that are interfaces
 // to types which are implementations of those interfaces.
-func InferInterfaces() Option {
-	return func(c *Container) *Container {
+func WithInterfaceInference() Option {
+	return func(c *Container) {
 		c.inferInterfaces = true
-		return c
 	}
 }
 
 // Allows the container to have multiple constructors with the same
 // output type, and will process them as lists (slices or arrays).
-func InferLists() Option {
-	return func(c *Container) *Container {
+func WithListInference() Option {
+	return func(c *Container) {
 		c.inferLists = true
-		return c
 	}
 }

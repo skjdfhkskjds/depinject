@@ -31,21 +31,21 @@ var (
 	// Instructs the container to enable the use of sentinel
 	// structs in constructor arguments and parses the struct's
 	// fields as constructor arguments.
-	UseInSentinel = depinject.UseInSentinel
+	WithInSentinel = depinject.WithInSentinel
 
 	// Instructs the container to enable the use of sentinel
 	// structs in constructor outputs and parses the struct's
 	// fields as constructor outputs.
 	// TODO: Not implemented yet.
-	UseOutSentinel = depinject.UseOutSentinel
+	WithOutSentinel = depinject.WithOutSentinel
 
 	// Allows the container to match dependencies that are interfaces
 	// to types which are implementations of those interfaces.
-	InferInterfaces = depinject.InferInterfaces
+	WithInterfaceInference = depinject.WithInterfaceInference
 
 	// Allows the container to have multiple constructors with the same
 	// output type, and will process them as lists (slices or arrays).
-	InferLists = depinject.InferLists
+	WithListInference = depinject.WithListInference
 )
 
 // Global container instance for users who would rather not

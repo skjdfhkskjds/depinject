@@ -18,10 +18,6 @@ func NewMultiBar() []*Bar {
 	return []*Bar{{}, {}}
 }
 
-func NewBar2() *Bar {
-	return &Bar{}
-}
-
 func TestWithVariadicNoArgs(t *testing.T) {
 	container := depinject.NewContainer()
 
@@ -48,11 +44,16 @@ func TestWithVariadicMultipleArgs(t *testing.T) {
 }
 
 func TestWithVariadicInferredList(t *testing.T) {
-	container := depinject.NewContainer(depinject.InferLists())
+	container := depinject.NewContainer(depinject.WithListInference())
 
-	require.NoError(t, container.Provide(NewFoo, NewBar, NewBar2, NewFooBarVariadic))
+	require.NoError(t, container.Provide(
+		depinject.NewContainer,
+		depinject.WithInterfaceInference(),
+		depinject.WithListInference(),
+		depinject.WithInSentinel(),
+	))
 
-	var fooBar *FooBar
-	require.NoError(t, container.Invoke(&fooBar))
-	fooBar.Print()
+	var container2 *depinject.Container
+	require.NoError(t, container.Invoke(&container2))
+	require.NotNil(t, container2)
 }

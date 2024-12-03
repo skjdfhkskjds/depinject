@@ -48,7 +48,7 @@ func NewContainer(opts ...Option) *Container {
 		inferLists:      false,
 	}
 	for _, opt := range opts {
-		c = opt(c)
+		opt(c)
 	}
 
 	c.graph = graph.NewDAG[*types.Node]()
