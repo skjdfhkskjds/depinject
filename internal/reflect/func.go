@@ -82,7 +82,7 @@ func WrapFunc(f any) (*Func, error) {
 
 	// Extract argument types
 	for i := 0; i < funcType.NumIn(); i++ {
-		fn.Args[i] = NewArg(funcType.In(i))
+		fn.Args[i] = NewArg(funcType.In(i), fn.argIsVariadic(i))
 	}
 
 	hasError := false
@@ -131,6 +131,19 @@ func (f *Func) Call(inferInterfaces bool, args ...any) error {
 	return nil
 }
 
+// GetFunctionName returns the name of the function.
+func GetFunctionName(f any) string {
+	// Check if f is a function
+	funcType := TypeOf(f)
+
+	// Check if funcType is not nil and its kind is Func
+	if funcType == nil || funcType.Kind() != reflect.Func {
+		return ""
+	}
+
+	return runtime.FuncForPC(ValueOf(f).Pointer()).Name()
+}
+
 // validateArgs validates the arguments against the expected types.
 func validateArgs(
 	args []any, expected []*Arg, isVariadic, inferInterfaces bool,
@@ -175,23 +188,16 @@ func validateArgs(
 	return nil
 }
 
+// argIsVariadic returns whether the argument at the given index is variadic.
+func (f *Func) argIsVariadic(index int) bool {
+	return f.IsVariadic && index == len(f.Args)-1
+}
+
+// formatList formats a list of types as a string.
 func formatList(prefix string, list []reflect.Type) string {
 	types := make([]string, len(list))
 	for i, t := range list {
 		types[i] = t.String()
 	}
 	return prefix + "{" + strings.Join(types, ", ") + "}"
-}
-
-// GetFunctionName returns the name of the function.
-func GetFunctionName(f any) string {
-	// Check if f is a function
-	funcType := TypeOf(f)
-
-	// Check if funcType is not nil and its kind is Func
-	if funcType == nil || funcType.Kind() != reflect.Func {
-		return ""
-	}
-
-	return runtime.FuncForPC(ValueOf(f).Pointer()).Name()
 }

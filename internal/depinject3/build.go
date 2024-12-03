@@ -37,14 +37,14 @@ func (c *Container) buildDependencyForNode(
 	dep *reflect.Arg,
 ) error {
 	// Search the registry for the dependency
-	providers, err := c.registry.Lookup(dep.Type)
+	providers, err := c.registry.Lookup(dep.Type, dep.IsVariadic)
 	if err != nil {
 		return err
 	}
 
 	// If the container does not support array inferencing,
-	// there should only be one provider.
-	if (!c.inferLists || !(dep.IsArray || dep.IsSlice)) && len(providers) != 1 {
+	// there should be at most one provider.
+	if (!c.inferLists || !(dep.IsArray || dep.IsSlice)) && len(providers) > 1 {
 		return fmt.Errorf("expected 1 provider, got %d", len(providers))
 	}
 

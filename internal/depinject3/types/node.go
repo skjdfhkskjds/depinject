@@ -40,12 +40,23 @@ func (n *Node) Dependencies() []*reflect.Arg {
 	return n.constructor.Args
 }
 
-func (n *Node) ValueOf(t reflect.Type) (reflect.Value, error) {
-	value, ok := n.constructor.Ret[t]
-	if !ok {
+func (n *Node) ValueOf(t reflect.Type, inferInterfaces bool) (reflect.Value, error) {
+	if value, ok := n.constructor.Ret[t]; ok {
+		return value, nil
+	}
+
+	if !inferInterfaces {
 		return reflect.Value{}, fmt.Errorf("no value for type %v", t)
 	}
-	return value, nil
+
+	// If we are inferring interfaces, we search for the first type
+	// that is assignable to the requested type.
+	for returnType, value := range n.constructor.Ret {
+		if returnType.AssignableTo(t) {
+			return value, nil
+		}
+	}
+	return reflect.Value{}, fmt.Errorf("no value for type %v", t)
 }
 
 func (n *Node) Outputs() []reflect.Type {

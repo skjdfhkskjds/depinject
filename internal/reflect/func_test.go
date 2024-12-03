@@ -57,7 +57,7 @@ func TestMakeNamedFunc(t *testing.T) {
 			wantHasError: false,
 			wantNumIn:    1,
 			wantNumOut:   1,
-			wantInTypes:  []*reflect.Arg{reflect.NewArg(reflect.TypeOf(0))},
+			wantInTypes:  []*reflect.Arg{reflect.NewArg(reflect.TypeOf(0), false)},
 			wantOutTypes: map[reflect.Type]reflect.Value{
 				reflect.TypeOf(1): {},
 			},
@@ -77,8 +77,8 @@ func TestMakeNamedFunc(t *testing.T) {
 			wantNumIn:    2,
 			wantNumOut:   2,
 			wantInTypes: []*reflect.Arg{
-				reflect.NewArg(reflect.TypeOf(0)),
-				reflect.NewArg(reflect.TypeOf(0)),
+				reflect.NewArg(reflect.TypeOf(0), false),
+				reflect.NewArg(reflect.TypeOf(0), false),
 			},
 			wantOutTypes: map[reflect.Type]reflect.Value{
 				reflect.TypeOf(0):              {},
@@ -136,7 +136,7 @@ func TestWrapFunc(t *testing.T) {
 			wantHasError: false,
 			wantNumIn:    1,
 			wantNumOut:   1,
-			wantInTypes:  []*reflect.Arg{reflect.NewArg(reflect.TypeOf(0))},
+			wantInTypes:  []*reflect.Arg{reflect.NewArg(reflect.TypeOf(0), false)},
 			wantOutTypes: map[reflect.Type]reflect.Value{
 				reflect.TypeOf(0): {},
 			},
@@ -151,8 +151,8 @@ func TestWrapFunc(t *testing.T) {
 			wantNumIn:    2,
 			wantNumOut:   2,
 			wantInTypes: []*reflect.Arg{
-				reflect.NewArg(reflect.TypeOf(0)),
-				reflect.NewArg(reflect.TypeOf(0)),
+				reflect.NewArg(reflect.TypeOf(0), false),
+				reflect.NewArg(reflect.TypeOf(0), false),
 			},
 			wantOutTypes: map[reflect.Type]reflect.Value{
 				reflect.TypeOf(0):                    {},
@@ -192,7 +192,7 @@ func TestWrapFunc(t *testing.T) {
 			wantHasError: false,
 			wantNumIn:    1,
 			wantNumOut:   1,
-			wantInTypes:  []*reflect.Arg{reflect.NewArg(reflect.TypeOf([]int{}))},
+			wantInTypes:  []*reflect.Arg{reflect.NewArg(reflect.TypeOf([]int{}), true)},
 			wantOutTypes: map[reflect.Type]reflect.Value{
 				reflect.TypeOf(0): {},
 			},

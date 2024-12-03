@@ -14,6 +14,9 @@ type Arg struct {
 	// Whether the argument is an interface.
 	IsInterface bool
 
+	// Whether the argument is variadic.
+	IsVariadic bool
+
 	// Whether the argument is a slice.
 	IsSlice bool
 
@@ -22,8 +25,8 @@ type Arg struct {
 	ArraySize int
 }
 
-func NewArg(t Type) *Arg {
-	arg := &Arg{Type: t}
+func NewArg(t Type, isVariadic bool) *Arg {
+	arg := &Arg{Type: t, IsVariadic: isVariadic}
 
 	switch t.Kind() {
 	case reflect.Array:

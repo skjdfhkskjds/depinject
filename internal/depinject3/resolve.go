@@ -21,10 +21,10 @@ func (c *Container) resolve() error {
 
 func (c *Container) resolveNode(node *types.Node) error {
 	dependencies := node.Dependencies()
-	values := make([]any, len(dependencies))
-	for i, dep := range dependencies {
+	values := make([]any, 0)
+	for _, dep := range dependencies {
 		// Get all the providers for each dependency.
-		providers, err := c.registry.Lookup(dep.Type)
+		providers, err := c.registry.Lookup(dep.Type, dep.IsVariadic)
 		if err != nil {
 			return err
 		}
@@ -33,21 +33,23 @@ func (c *Container) resolveNode(node *types.Node) error {
 		// If the dependency is an array or slice, create a slice of the
 		// appropriate size and set the values from the providers.
 		if c.inferLists && ((dep.IsArray && len(providers) == dep.ArraySize) || dep.IsSlice) {
-			value, err = newSliceOfDep(dep, providers)
+			value, err = newSliceOfDep(dep, providers, c.inferInterfaces)
 			if err != nil {
 				return err
 			}
+			continue
+		} else if len(providers) == 0 && dep.IsVariadic {
 			continue
 		} else if len(providers) != 1 {
 			return fmt.Errorf("expected 1 provider, got %d", len(providers))
 		}
 
-		value, err = providers[0].ValueOf(dep.Type)
+		value, err = providers[0].ValueOf(dep.Type, c.inferInterfaces)
 		if err != nil {
 			return err
 		}
 
-		values[i] = value.Interface()
+		values = append(values, value.Interface())
 	}
 
 	if err := node.Execute(c.inferInterfaces, values...); err != nil {
@@ -59,14 +61,16 @@ func (c *Container) resolveNode(node *types.Node) error {
 
 // newSliceOfDep creates a slice of the given dependency type with the
 // appropriate size and sets the values from the providers.
-func newSliceOfDep(dep *reflect.Arg, providers []*types.Node) (reflect.Value, error) {
+func newSliceOfDep(
+	dep *reflect.Arg, providers []*types.Node, inferInterfaces bool,
+) (reflect.Value, error) {
 	slice := reflect.MakeSlice(
 		dep.Type,
 		len(providers),
 		max(len(providers), dep.ArraySize),
 	)
 	for j, provider := range providers {
-		providerValue, err := provider.ValueOf(dep.Type)
+		providerValue, err := provider.ValueOf(dep.Type, inferInterfaces)
 		if err != nil {
 			return reflect.Value{}, err
 		}

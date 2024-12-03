@@ -40,14 +40,13 @@ func (c *Container) invoke(output any) error {
 	}
 
 	// Search the registry for any value which matches the type of v
-	providers, err := c.registry.Lookup(outputType)
+	providers, err := c.registry.Lookup(outputType, false)
 	if err != nil {
 		return err
 	}
 
-	// TODO: should we support array inferencing on invoke?
+	// TODO: add support for array referencing on invoke.
 	if len(providers) != 1 {
-		// fmt.Println(providers)
 		return fmt.Errorf("expected 1 provider, got %d", len(providers))
 	}
 
@@ -55,7 +54,7 @@ func (c *Container) invoke(output any) error {
 	fmt.Println("PROVIDER")
 	fmt.Println(providers[0].ID())
 	fmt.Println(outputType)
-	value, err := providers[0].ValueOf(outputType)
+	value, err := providers[0].ValueOf(outputType, c.inferInterfaces)
 	if err != nil {
 		return err
 	}

@@ -65,7 +65,7 @@ func TestNewArg(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			arg := reflect.NewArg(tt.input)
+			arg := reflect.NewArg(tt.input, false)
 
 			if arg.IsArray != tt.wantIsArray {
 				t.Errorf("IsArray = %v, want %v", arg.IsArray, tt.wantIsArray)
