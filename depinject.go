@@ -1,7 +1,7 @@
 package depinject
 
 import (
-	depinject "github.com/skjdfhkskjds/depinject/internal/depinject3"
+	depinject "github.com/skjdfhkskjds/depinject/internal/depinject"
 )
 
 // Available types from this package.

@@ -4,7 +4,7 @@ import (
 	"io"
 	"os"
 
-	"github.com/skjdfhkskjds/depinject/internal/depinject3/types"
+	"github.com/skjdfhkskjds/depinject/internal/depinject/types"
 	"github.com/skjdfhkskjds/depinject/internal/graph"
 )
 

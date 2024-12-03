@@ -1,6 +1,6 @@
 package depinject
 
-import "github.com/skjdfhkskjds/depinject/internal/depinject3/types"
+import "github.com/skjdfhkskjds/depinject/internal/depinject/types"
 
 const provideErrorName = "provide"
 
