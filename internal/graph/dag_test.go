@@ -23,6 +23,17 @@ func TestDAG(t *testing.T) {
 		assert.NotNil(t, dag)
 	})
 
+	t.Run("Vertices", func(t *testing.T) {
+		dag := graph.NewDAG[testVertex]()
+		assert.Empty(t, dag.Vertices())
+
+		v1 := testVertex{id: "1"}
+		v2 := testVertex{id: "2"}
+		dag.AddVertex(v1)
+		dag.AddVertex(v2)
+		assert.Equal(t, []testVertex{v1, v2}, dag.Vertices())
+	})
+
 	t.Run("AddVertex", func(t *testing.T) {
 		dag := graph.NewDAG[testVertex]()
 		v := testVertex{id: "1"}

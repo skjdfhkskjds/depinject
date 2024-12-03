@@ -42,5 +42,6 @@ func (s *Struct) Constructor() *Func {
 			}
 			return []Value{structValue}
 		},
+		s.Name,
 	)
 }

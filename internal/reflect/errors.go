@@ -11,4 +11,7 @@ var (
 
 	// ErrWrongNumArgs is returned when the number of arguments is wrong.
 	ErrWrongNumArgs = errors.New("wrong number of arguments")
+
+	// ErrInvalidArgType is returned when an argument type is invalid.
+	ErrInvalidArgType = errors.New("invalid argument type")
 )

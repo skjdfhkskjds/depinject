@@ -30,7 +30,7 @@ func newContainerError(
 
 func (e *containerError) Error() string {
 	var msg = fmt.Sprintf(
-		"error in %s: failed to resolve %s: %s",
+		"error in %s, on %s: %s",
 		e.sourceName,
 		e.resolvingType,
 		e.root.Error(),

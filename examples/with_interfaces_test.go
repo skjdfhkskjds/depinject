@@ -19,7 +19,7 @@ import (
 // and request an instance of FooBarI.
 
 func TestWithInterfaces(t *testing.T) {
-	container := depinject.NewContainer()
+	container := depinject.NewContainer(depinject.InferInterfaces)
 
 	// Provide a set of constructors into the container.
 	require.NoError(t, container.Provide(

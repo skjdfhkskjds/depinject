@@ -1,7 +1,7 @@
 package depinject
 
 import (
-	"github.com/skjdfhkskjds/depinject/internal/depinject2/types"
+	"github.com/skjdfhkskjds/depinject/internal/depinject3/types"
 	"github.com/skjdfhkskjds/depinject/internal/reflect"
 )
 
@@ -27,7 +27,11 @@ func (c *Container) supply(value any) error {
 		func(args []reflect.Value) []reflect.Value {
 			return []reflect.Value{reflect.ValueOf(value)}
 		},
+		reflect.TypeOf(value).String(),
 	)
 
-	return c.register(types.NewConstructorFromFunc(fn), supplyErrorName)
+	if err := c.register(types.NewNodeFromFunc(fn), supplyErrorName); err != nil {
+		return newContainerError(err, supplyErrorName, fn.Name)
+	}
+	return nil
 }
