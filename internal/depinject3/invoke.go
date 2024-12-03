@@ -51,15 +51,10 @@ func (c *Container) invoke(output any) error {
 	}
 
 	// Assign the value to the output
-	fmt.Println("PROVIDER")
-	fmt.Println(providers[0].ID())
-	fmt.Println(outputType)
 	value, err := providers[0].ValueOf(outputType, c.inferInterfaces)
 	if err != nil {
 		return err
 	}
-	fmt.Println("VALUE")
-	fmt.Println(value)
 	reflect.ValueOf(output).Elem().Set(value)
 
 	return nil

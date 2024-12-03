@@ -103,7 +103,9 @@ func WrapFunc(f any) (*Func, error) {
 
 // Call calls the original function with the given arguments.
 func (f *Func) Call(inferInterfaces bool, args ...any) error {
-	if err := validateArgs(args, f.Args, f.IsVariadic, inferInterfaces); err != nil {
+	if err := validateCallArgs(
+		args, f.Args, f.IsVariadic, inferInterfaces,
+	); err != nil {
 		return err
 	}
 
@@ -145,7 +147,7 @@ func GetFunctionName(f any) string {
 }
 
 // validateArgs validates the arguments against the expected types.
-func validateArgs(
+func validateCallArgs(
 	args []any, expected []*Arg, isVariadic, inferInterfaces bool,
 ) error {
 	lastIndex := len(expected) - 1
@@ -174,14 +176,24 @@ func validateArgs(
 			// Check the argument types from the remaining arguments.
 			for _, arg := range args[i:] {
 				if !e.IsType(TypeOf(arg), inferInterfaces) {
-					return fmt.Errorf("%w: got %s, expected %s", ErrInvalidArgType, TypeOf(arg).String(), e.String())
+					return fmt.Errorf(
+						"%w: got %s, expected %s",
+						ErrInvalidArgType,
+						TypeOf(arg).String(),
+						e.String(),
+					)
 				}
 			}
 		}
 
 		// Check if the argument matches the expected type.
 		if !e.IsType(TypeOf(args[i]), inferInterfaces) {
-			return fmt.Errorf("%w: got %s, expected %s", ErrInvalidArgType, TypeOf(args[i]).String(), e.String())
+			return fmt.Errorf(
+				"%w: got %s, expected %s",
+				ErrInvalidArgType,
+				TypeOf(args[i]).String(),
+				e.String(),
+			)
 		}
 	}
 

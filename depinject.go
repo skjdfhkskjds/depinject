@@ -1,7 +1,6 @@
 package depinject
 
 import (
-	"github.com/skjdfhkskjds/depinject/internal/depinject/types/sentinels"
 	depinject "github.com/skjdfhkskjds/depinject/internal/depinject3"
 )
 
@@ -20,13 +19,28 @@ type (
 	// In is a sentinel type used to indicate that a struct is
 	// actually a container for various types that should be included
 	// in the constructor's argument list.
-	In = sentinels.In
+	In = depinject.In
+
+	// Out is a sentinel type used to indicate that a struct is
+	// actually a container for various types that should be included
+	// in the constructor's output list.
+	Out = depinject.Out
 )
 
 // Available functions from this package.
 var (
 	// NewContainer returns a new, valid container.
 	NewContainer = depinject.NewContainer
+
+	// DefaultContainer returns a new container with the default options.
+	DefaultContainer = depinject.DefaultContainer
+
+	// ===============================================================
+	//                            Options
+	// ===============================================================
+
+	// WithWriter sets the writer to dump the container's info to.
+	WithWriter = depinject.WithWriter
 
 	// Instructs the container to enable the use of sentinel
 	// structs in constructor arguments and parses the struct's

@@ -1,6 +1,15 @@
 package depinject
 
+import "io"
+
 type Option func(*Container)
+
+// Sets the writer to dump the container's info to.
+func WithWriter(w io.Writer) Option {
+	return func(c *Container) {
+		c.writer = w
+	}
+}
 
 // Instructs the container to enable the use of sentinel
 // structs in constructor arguments and parses the struct's

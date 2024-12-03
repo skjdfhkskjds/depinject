@@ -98,6 +98,5 @@ func (r *Registry) allMatchingTypes(t reflect.Type) []reflect.Type {
 		}
 	}
 
-	fmt.Println("types", types)
 	return types
 }

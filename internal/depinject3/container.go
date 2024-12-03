@@ -1,7 +1,8 @@
 package depinject
 
 import (
-	"fmt"
+	"io"
+	"os"
 
 	"github.com/skjdfhkskjds/depinject/internal/depinject3/types"
 	"github.com/skjdfhkskjds/depinject/internal/graph"
@@ -10,6 +11,9 @@ import (
 type Container struct {
 	graph    *graph.DAG[*types.Node]
 	registry *types.Registry
+
+	// The writer to dump the container's info to.
+	writer io.Writer
 
 	// Whether the container is ready to be invoked.
 	invokable bool
@@ -26,7 +30,6 @@ type Container struct {
 	// Instructs the container to enable the use of sentinel
 	// structs in constructor outputs and parses the struct's
 	// fields as constructor outputs.
-	// TODO: Not implemented yet.
 	useOutSentinel bool
 
 	// Allows the container to match dependencies that are interfaces
@@ -38,8 +41,10 @@ type Container struct {
 	inferLists bool
 }
 
-func NewContainer(opts ...Option) *Container {
-	c := &Container{
+// DefaultContainer returns a new container with the default options.
+func DefaultContainer() *Container {
+	return &Container{
+		writer:          os.Stdout,
 		invokable:       false,
 		sortedNodes:     nil,
 		useInSentinel:   false,
@@ -47,6 +52,11 @@ func NewContainer(opts ...Option) *Container {
 		inferInterfaces: false,
 		inferLists:      false,
 	}
+}
+
+// NewContainer returns a new container with the given options.
+func NewContainer(opts ...Option) *Container {
+	c := DefaultContainer()
 	for _, opt := range opts {
 		opt(c)
 	}
@@ -56,6 +66,15 @@ func NewContainer(opts ...Option) *Container {
 	return c
 }
 
+// Dump dumps the container's registry into the writer.
 func (c *Container) Dump() {
-	fmt.Println(c.registry.Dump())
+	c.writer.Write([]byte(c.registry.Dump()))
+}
+
+// Destroy destroys the container and frees its memory.
+func (c *Container) Destroy() {
+	c.graph = nil
+	c.registry = nil
+	c.sortedNodes = nil
+	c = nil
 }

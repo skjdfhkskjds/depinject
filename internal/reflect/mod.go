@@ -15,6 +15,7 @@ var (
 
 	Interface = reflect.Interface
 	Ptr       = reflect.Ptr
+	Struct    = reflect.Struct
 )
 
 // IsError returns true if the given type is an error.
