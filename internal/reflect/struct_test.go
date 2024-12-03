@@ -42,11 +42,12 @@ func TestStruct_Constructor(t *testing.T) {
 	require.NoError(t, err)
 
 	constructor := s.Constructor()
-	result, err := constructor.Call("test", 42, true)
+	err = constructor.Call(true, "test", 42, true)
 	require.NoError(t, err)
 
+	result := constructor.Ret
 	require.Len(t, result, 1)
-	constructedStruct, ok := result[0].Interface().(testStruct)
+	constructedStruct, ok := result[testStructType].Interface().(testStruct)
 	require.True(t, ok)
 
 	require.Equal(t, "test", constructedStruct.Field1)

@@ -1,6 +1,7 @@
 package examples
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/skjdfhkskjds/depinject"
@@ -19,6 +20,11 @@ import (
 // into the container and request an instance of FooBar.
 
 func TestBasic(t *testing.T) {
+
+	type1 := reflect.TypeOf(&Foo{})
+	type2 := reflect.TypeOf(&Foo{})
+	require.True(t, type1 == type2)
+
 	container := depinject.NewContainer()
 
 	// Supply a value into the container directly.
@@ -33,7 +39,17 @@ func TestBasic(t *testing.T) {
 	// Invoke a function with the dependencies injected
 	// to retrieve the FooBar instance.
 	var fooBar *FooBar
-	require.NoError(t, container.Invoke(&fooBar))
+	defer func() {
+		if r := recover(); r != nil {
+			container.Dump()
+			panic(r)
+		}
+	}()
+	err := container.Invoke(&fooBar)
+	if err != nil {
+		container.Dump()
+	}
+	require.NoError(t, err)
 	fooBar.Print()
 }
 

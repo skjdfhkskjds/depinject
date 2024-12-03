@@ -2,7 +2,6 @@ package reflect_test
 
 import (
 	"errors"
-	stdreflect "reflect"
 	"testing"
 
 	"github.com/skjdfhkskjds/depinject/internal/reflect"
@@ -41,10 +40,11 @@ func TestMakeNamedFunc(t *testing.T) {
 		args         []reflect.Type
 		ret          []reflect.Type
 		fn           func([]reflect.Value) []reflect.Value
+		wantHasError bool
 		wantNumIn    int
 		wantNumOut   int
-		wantInTypes  []reflect.Type
-		wantOutTypes []reflect.Type
+		wantInTypes  []*reflect.Arg
+		wantOutTypes map[reflect.Type]reflect.Value
 		wantName     string
 	}{
 		{
@@ -54,11 +54,14 @@ func TestMakeNamedFunc(t *testing.T) {
 			fn: func(args []reflect.Value) []reflect.Value {
 				return []reflect.Value{reflect.ValueOf(1)}
 			},
+			wantHasError: false,
 			wantNumIn:    1,
 			wantNumOut:   1,
-			wantInTypes:  []reflect.Type{reflect.TypeOf(0)},
-			wantOutTypes: []reflect.Type{reflect.TypeOf(1)},
-			wantName:     "GeneratedFunc(Args{int}Returns{int})",
+			wantInTypes:  []*reflect.Arg{reflect.NewArg(reflect.TypeOf(0), false)},
+			wantOutTypes: map[reflect.Type]reflect.Value{
+				reflect.TypeOf(1): {},
+			},
+			wantName: "GeneratedFunc(Args{int}Returns{int})",
 		},
 		{
 			name: "valid function with two inputs and two outputs",
@@ -70,12 +73,16 @@ func TestMakeNamedFunc(t *testing.T) {
 					reflect.ValueOf(errors.New("")),
 				}
 			},
-			wantNumIn:   2,
-			wantNumOut:  2,
-			wantInTypes: []reflect.Type{reflect.TypeOf(0), reflect.TypeOf(0)},
-			wantOutTypes: []reflect.Type{
-				reflect.TypeOf(0),
-				reflect.TypeOf(errors.New("")),
+			wantHasError: true,
+			wantNumIn:    2,
+			wantNumOut:   2,
+			wantInTypes: []*reflect.Arg{
+				reflect.NewArg(reflect.TypeOf(0), false),
+				reflect.NewArg(reflect.TypeOf(0), false),
+			},
+			wantOutTypes: map[reflect.Type]reflect.Value{
+				reflect.TypeOf(0):              {},
+				reflect.TypeOf(errors.New("")): {},
 			},
 			wantName: "GeneratedFunc(Args{int, int}Returns{int, *errors.errorString})",
 		},
@@ -84,17 +91,18 @@ func TestMakeNamedFunc(t *testing.T) {
 			args:         []reflect.Type{},
 			ret:          []reflect.Type{},
 			fn:           nil,
+			wantHasError: false,
 			wantNumIn:    0,
 			wantNumOut:   0,
-			wantInTypes:  []reflect.Type{},
-			wantOutTypes: []reflect.Type{},
+			wantInTypes:  []*reflect.Arg{},
+			wantOutTypes: map[reflect.Type]reflect.Value{},
 			wantName:     "GeneratedFunc(Args{}Returns{})",
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			fn := reflect.MakeNamedFunc(tt.args, tt.ret, tt.fn)
+			fn := reflect.MakeNamedFunc(tt.args, tt.ret, tt.fn, "")
 			assert.NotNil(t, fn)
 
 			assert.Equal(t, tt.wantNumIn, len(fn.Args))
@@ -102,6 +110,7 @@ func TestMakeNamedFunc(t *testing.T) {
 			assert.Equal(t, tt.wantInTypes, fn.Args)
 			assert.Equal(t, tt.wantOutTypes, fn.Ret)
 			assert.Equal(t, fn.Name, tt.wantName)
+			assert.Equal(t, fn.HasError, tt.wantHasError)
 		})
 	}
 }
@@ -112,37 +121,42 @@ func TestWrapFunc(t *testing.T) {
 		name           string
 		input          any
 		err            error
+		wantHasError   bool
 		wantNumIn      int
 		wantNumOut     int
-		wantInTypes    []reflect.Type
-		wantOutTypes   []reflect.Type
+		wantInTypes    []*reflect.Arg
+		wantOutTypes   map[reflect.Type]reflect.Value
 		wantName       string
 		wantIsVariadic bool
 	}{
 		{
-			name:           "valid function with one input and one output",
-			input:          add1,
-			err:            nil,
-			wantNumIn:      1,
-			wantNumOut:     1,
-			wantInTypes:    []reflect.Type{reflect.TypeOf(0)},
-			wantOutTypes:   []reflect.Type{reflect.TypeOf(0)},
+			name:         "valid function with one input and one output",
+			input:        add1,
+			err:          nil,
+			wantHasError: false,
+			wantNumIn:    1,
+			wantNumOut:   1,
+			wantInTypes:  []*reflect.Arg{reflect.NewArg(reflect.TypeOf(0), false)},
+			wantOutTypes: map[reflect.Type]reflect.Value{
+				reflect.TypeOf(0): {},
+			},
 			wantName:       pkgPath + "add1",
 			wantIsVariadic: false,
 		},
 		{
-			name:       "valid function with two inputs and two outputs",
-			input:      divide,
-			err:        nil,
-			wantNumIn:  2,
-			wantNumOut: 2,
-			wantInTypes: []reflect.Type{
-				reflect.TypeOf(0),
-				reflect.TypeOf(0),
+			name:         "valid function with two inputs and two outputs",
+			input:        divide,
+			err:          nil,
+			wantHasError: true,
+			wantNumIn:    2,
+			wantNumOut:   2,
+			wantInTypes: []*reflect.Arg{
+				reflect.NewArg(reflect.TypeOf(0), false),
+				reflect.NewArg(reflect.TypeOf(0), false),
 			},
-			wantOutTypes: []reflect.Type{
-				reflect.TypeOf(0),
-				reflect.TypeOf((*error)(nil)).Elem(),
+			wantOutTypes: map[reflect.Type]reflect.Value{
+				reflect.TypeOf(0):                    {},
+				reflect.TypeOf((*error)(nil)).Elem(): {},
 			},
 			wantName:       pkgPath + "divide",
 			wantIsVariadic: false,
@@ -151,6 +165,7 @@ func TestWrapFunc(t *testing.T) {
 			name:           "nil input",
 			input:          nil,
 			err:            reflect.ErrNotAFunction,
+			wantHasError:   true,
 			wantNumIn:      0,
 			wantNumOut:     0,
 			wantInTypes:    nil,
@@ -162,6 +177,7 @@ func TestWrapFunc(t *testing.T) {
 			name:           "non-function input",
 			input:          42,
 			err:            reflect.ErrNotAFunction,
+			wantHasError:   true,
 			wantNumIn:      0,
 			wantNumOut:     0,
 			wantInTypes:    nil,
@@ -170,13 +186,16 @@ func TestWrapFunc(t *testing.T) {
 			wantIsVariadic: false,
 		},
 		{
-			name:           "variadic function",
-			input:          addMulti,
-			err:            nil,
-			wantNumIn:      1,
-			wantNumOut:     1,
-			wantInTypes:    []reflect.Type{reflect.TypeOf([]int{})},
-			wantOutTypes:   []reflect.Type{reflect.TypeOf(0)},
+			name:         "variadic function",
+			input:        addMulti,
+			err:          nil,
+			wantHasError: false,
+			wantNumIn:    1,
+			wantNumOut:   1,
+			wantInTypes:  []*reflect.Arg{reflect.NewArg(reflect.TypeOf([]int{}), true)},
+			wantOutTypes: map[reflect.Type]reflect.Value{
+				reflect.TypeOf(0): {},
+			},
 			wantName:       pkgPath + "addMulti",
 			wantIsVariadic: true,
 		},
@@ -197,6 +216,10 @@ func TestWrapFunc(t *testing.T) {
 				"NewFunc() function name = %s, want %s", fn.Name, tt.wantName,
 			)
 			require.Equal(
+				t, tt.wantHasError, fn.HasError,
+				"NewFunc() HasError = %t, want %t", fn.HasError, tt.wantHasError,
+			)
+			require.Equal(
 				t, len(fn.Args), tt.wantNumIn,
 				"NewFunc() number of inputs = %d, want %d", len(fn.Args), tt.wantNumIn,
 			)
@@ -210,10 +233,10 @@ func TestWrapFunc(t *testing.T) {
 					"Input type mismatch at index %d", i,
 				)
 			}
-			for i, ret := range fn.Ret {
+			for outputType, ret := range fn.Ret {
 				require.Equal(
-					t, tt.wantOutTypes[i], ret,
-					"Output type mismatch at index %d", i,
+					t, tt.wantOutTypes[outputType], ret,
+					"Output type mismatch, want %v, got %v", tt.wantOutTypes[outputType], ret,
 				)
 			}
 		})
@@ -256,25 +279,34 @@ func TestFunc_Call(t *testing.T) {
 			name:   "valid division",
 			f:      divideFn,
 			args:   []any{10, 2},
-			output: []any{5, nil},
+			output: []any{5, (error)(nil)},
 			err:    nil,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := tt.f.Call(tt.args...)
+			err := tt.f.Call(true, tt.args...)
 			require.ErrorIs(
 				t, err, tt.err,
 				"Func.Call() error = %v, wantErr %v", err, tt.err,
 			)
-			require.Equal(
-				t, len(got), len(tt.output),
-				"Func.Call() got %d return values, want %d", len(got), len(tt.output),
-			)
-			for i, v := range tt.output {
-				if !stdreflect.DeepEqual(got[i].Interface(), v) {
-					t.Errorf("Func.Call() got[%d] = %v, want %v", i, got[i].Interface(), v)
+
+			// Only check the output if the function has no error.
+			if tt.err == nil {
+				got := tt.f.Ret
+				require.Equal(
+					t, len(got), len(tt.output),
+					"Func.Call() got %d return values, want %d", len(got), len(tt.output),
+				)
+
+				i := 0
+				for _, v := range got {
+					require.Equal(
+						t, tt.output[i], v.Interface(),
+						"Func.Call() got[%d] = %v, want %v", i, v.Interface(), tt.output[i],
+					)
+					i++
 				}
 			}
 		})

@@ -42,3 +42,18 @@ func TestWithVariadicMultipleArgs(t *testing.T) {
 	require.NoError(t, container.Supply(&Foo{}))
 	require.NoError(t, container.Provide(NewMultiBar, NewFooBarVariadic))
 }
+
+func TestWithVariadicInferredList(t *testing.T) {
+	container := depinject.NewContainer(depinject.WithListInference())
+
+	require.NoError(t, container.Provide(
+		depinject.NewContainer,
+		depinject.WithInterfaceInference(),
+		depinject.WithListInference(),
+		depinject.WithInSentinel(),
+	))
+
+	var container2 *depinject.Container
+	require.NoError(t, container.Invoke(&container2))
+	require.NotNil(t, container2)
+}

@@ -15,6 +15,15 @@ func NewDAG[VertexT Vertex]() *DAG[VertexT] {
 	}
 }
 
+// Vertices returns all vertices in the DAG.
+func (g *DAG[VertexT]) Vertices() []VertexT {
+	vertices := make([]VertexT, 0, len(g.vertices))
+	for _, v := range g.vertices {
+		vertices = append(vertices, v)
+	}
+	return vertices
+}
+
 // AddVertex adds a new vertex to the DAG.
 func (g *DAG[VertexT]) AddVertex(v VertexT) error {
 	if g.hasVertex(v) {
