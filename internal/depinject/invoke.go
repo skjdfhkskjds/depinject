@@ -1,30 +1,32 @@
 package depinject
 
 import (
-	"fmt"
-
+	"github.com/skjdfhkskjds/depinject/internal/errors"
 	"github.com/skjdfhkskjds/depinject/internal/reflect"
 )
 
 const invokeErrorName = "invoke"
 
+// Invoke is a public function that allows for the invocation of
+// values from the container. This function should be called after
+// all required values and providers have been registered.
 func (c *Container) Invoke(outputs ...any) error {
 	if !c.invokable {
 		var err error
 		if err = c.build(); err != nil {
-			return err
+			return c.interceptError(err)
 		}
 		if err = c.resolve(); err != nil {
-			return err
+			return c.interceptError(err)
 		}
 		c.invokable = true
 	}
 
 	for _, output := range outputs {
 		if err := c.invoke(output); err != nil {
-			return newContainerError(
+			return c.interceptError(newContainerError(
 				err, invokeErrorName, reflect.TypeOf(output).Elem().String(),
-			)
+			))
 		}
 	}
 	return nil
@@ -47,7 +49,7 @@ func (c *Container) invoke(output any) error {
 
 	// TODO: add support for array referencing on invoke.
 	if len(providers) != 1 {
-		return fmt.Errorf("expected 1 provider, got %d", len(providers))
+		return errors.Newf(expected1ProviderErrMsg, len(providers))
 	}
 
 	// Assign the value to the output

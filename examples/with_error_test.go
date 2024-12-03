@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/skjdfhkskjds/depinject"
+	"github.com/stretchr/testify/require"
 )
 
 // This examples builds a valid container but forces an
@@ -33,7 +34,5 @@ func TestWithError(t *testing.T) {
 	}
 
 	var fooBar *FooBarError
-	if err := container.Invoke(&fooBar); err == nil {
-		panic("expected error")
-	}
+	require.Error(t, container.Invoke(&fooBar))
 }

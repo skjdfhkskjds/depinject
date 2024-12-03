@@ -4,14 +4,17 @@ type DAG[VertexT Vertex] struct {
 	vertices map[string]VertexT
 	edges    map[string][]VertexT
 	indegree map[string]int
+
+	enforceUniqueVertices bool
 }
 
 // NewDAG creates a new empty DAG.
-func NewDAG[VertexT Vertex]() *DAG[VertexT] {
+func NewDAG[VertexT Vertex](enforceUniqueVertices bool) *DAG[VertexT] {
 	return &DAG[VertexT]{
-		vertices: make(map[string]VertexT),
-		edges:    make(map[string][]VertexT),
-		indegree: make(map[string]int),
+		vertices:              make(map[string]VertexT),
+		edges:                 make(map[string][]VertexT),
+		indegree:              make(map[string]int),
+		enforceUniqueVertices: enforceUniqueVertices,
 	}
 }
 
@@ -27,7 +30,10 @@ func (g *DAG[VertexT]) Vertices() []VertexT {
 // AddVertex adds a new vertex to the DAG.
 func (g *DAG[VertexT]) AddVertex(v VertexT) error {
 	if g.hasVertex(v) {
-		return ErrVertexAlreadyExists
+		if g.enforceUniqueVertices {
+			return ErrVertexAlreadyExists
+		}
+		return nil
 	}
 
 	g.vertices[v.ID()] = v

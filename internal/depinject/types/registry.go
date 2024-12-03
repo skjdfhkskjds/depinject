@@ -1,9 +1,9 @@
 package types
 
 import (
-	"fmt"
 	"strings"
 
+	"github.com/skjdfhkskjds/depinject/internal/errors"
 	"github.com/skjdfhkskjds/depinject/internal/reflect"
 )
 
@@ -35,14 +35,12 @@ func (r *Registry) Register(node *Node) error {
 		if reflect.IsError(t) {
 			continue
 		}
-		// for _, t := range r.allMatchingTypes(outputType) {
 		if _, exists := r.providers[t]; exists && !r.inferLists {
-			return fmt.Errorf("multiple providers registered for type %s", t)
+			return errors.Newf(multipleProvidersErrMsg, t)
 		} else if !exists {
 			r.providers[t] = make([]*Node, 0)
 		}
 		r.providers[t] = append(r.providers[t], node)
-		// }
 	}
 	return nil
 }
@@ -62,18 +60,17 @@ func (r *Registry) Lookup(requested reflect.Type, optional bool) ([]*Node, error
 		}
 	}
 	if len(allProviders) == 0 && !optional {
-		return nil, fmt.Errorf("no providers registered for type %s", requested)
+		return nil, errors.Newf(noProvidersErrMsg, requested)
 	}
 	return allProviders, nil
 }
 
 func (r *Registry) Dump() string {
 	var dump strings.Builder
-	dump.WriteString(fmt.Sprintf("Registry dump:\n"))
 	for t, nodes := range r.providers {
-		dump.WriteString(fmt.Sprintf("Type %v:\n", t))
+		dump.WriteString(t.String() + ":\n")
 		for _, node := range nodes {
-			dump.WriteString(fmt.Sprintf("\t%v\n", node.ID()))
+			dump.WriteString("\t" + node.ID() + "\n")
 		}
 	}
 	return dump.String()

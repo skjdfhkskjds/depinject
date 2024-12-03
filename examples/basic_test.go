@@ -39,17 +39,7 @@ func TestBasic(t *testing.T) {
 	// Invoke a function with the dependencies injected
 	// to retrieve the FooBar instance.
 	var fooBar *FooBar
-	defer func() {
-		if r := recover(); r != nil {
-			container.Dump()
-			panic(r)
-		}
-	}()
-	err := container.Invoke(&fooBar)
-	if err != nil {
-		container.Dump()
-	}
-	require.NoError(t, err)
+	require.NoError(t, container.Invoke(&fooBar))
 	fooBar.Print()
 }
 
