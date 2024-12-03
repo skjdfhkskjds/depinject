@@ -1,13 +1,13 @@
 package depinject
 
-import "io"
+import "log"
 
 type Option func(*Container)
 
-// Sets the writer to dump the container's info to.
-func WithWriter(w io.Writer) Option {
+// Sets the logger to dump the container's info to.
+func WithLogger(l *log.Logger) Option {
 	return func(c *Container) {
-		c.writer = w
+		c.logger = l
 	}
 }
 

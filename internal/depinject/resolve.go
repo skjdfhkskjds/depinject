@@ -1,14 +1,15 @@
 package depinject
 
 import (
-	"fmt"
-
 	"github.com/skjdfhkskjds/depinject/internal/depinject/types"
+	"github.com/skjdfhkskjds/depinject/internal/errors"
 	"github.com/skjdfhkskjds/depinject/internal/reflect"
 )
 
 const resolveErrorName = "resolve"
 
+// resolve resolves the container's nodes in order. By the end of this
+// routine, every node will have been invoked.
 func (c *Container) resolve() error {
 	for _, node := range c.sortedNodes {
 		if err := c.resolveNode(node); err != nil {
@@ -19,6 +20,7 @@ func (c *Container) resolve() error {
 	return nil
 }
 
+// resolveNode resolves a single node.
 func (c *Container) resolveNode(node *types.Node) error {
 	dependencies := node.Dependencies()
 	values := make([]any, 0)
@@ -41,7 +43,7 @@ func (c *Container) resolveNode(node *types.Node) error {
 		} else if len(providers) == 0 && dep.IsVariadic {
 			continue
 		} else if len(providers) != 1 {
-			return fmt.Errorf("expected 1 provider, got %d", len(providers))
+			return errors.Newf(expected1ProviderErrMsg, len(providers))
 		}
 
 		value, err = providers[0].ValueOf(dep.Type, c.inferInterfaces)

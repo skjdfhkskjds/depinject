@@ -1,8 +1,7 @@
 package types
 
 import (
-	"fmt"
-
+	"github.com/skjdfhkskjds/depinject/internal/errors"
 	"github.com/skjdfhkskjds/depinject/internal/reflect"
 )
 
@@ -46,7 +45,7 @@ func (n *Node) ValueOf(t reflect.Type, inferInterfaces bool) (reflect.Value, err
 	}
 
 	if !inferInterfaces {
-		return reflect.Value{}, fmt.Errorf("no value for type %v", t)
+		return reflect.Value{}, errors.Newf(noValueForTypeErrMsg, t)
 	}
 
 	// If we are inferring interfaces, we search for the first type
@@ -56,7 +55,7 @@ func (n *Node) ValueOf(t reflect.Type, inferInterfaces bool) (reflect.Value, err
 			return value, nil
 		}
 	}
-	return reflect.Value{}, fmt.Errorf("no value for type %v", t)
+	return reflect.Value{}, errors.Newf(noValueForTypeErrMsg, t)
 }
 
 func (n *Node) Outputs() []reflect.Type {

@@ -7,14 +7,14 @@ import (
 
 const supplyErrorName = "supply"
 
-// Supply is a helper function that allows for the injection of
+// Supply is a public function that allows for the injection of
 // values into the container. It is useful for injecting values
 // that are not created by the container, such as command-line
 // arguments or environment variables.
 func (c *Container) Supply(values ...any) error {
 	for _, value := range values {
 		if err := c.supply(value); err != nil {
-			return err
+			return c.interceptError(err)
 		}
 	}
 	return nil

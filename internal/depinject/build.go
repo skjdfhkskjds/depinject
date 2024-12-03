@@ -1,9 +1,8 @@
 package depinject
 
 import (
-	"fmt"
-
 	"github.com/skjdfhkskjds/depinject/internal/depinject/types"
+	"github.com/skjdfhkskjds/depinject/internal/errors"
 	"github.com/skjdfhkskjds/depinject/internal/reflect"
 )
 
@@ -45,7 +44,7 @@ func (c *Container) buildDependencyForNode(
 	// If the container does not support array inferencing,
 	// there should be at most one provider.
 	if (!c.inferLists || !(dep.IsArray || dep.IsSlice)) && len(providers) > 1 {
-		return fmt.Errorf("expected 1 provider, got %d", len(providers))
+		return errors.Newf(expected1ProviderErrMsg, len(providers))
 	}
 
 	for _, provider := range providers {

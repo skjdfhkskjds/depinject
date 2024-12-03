@@ -4,6 +4,13 @@ import (
 	"fmt"
 )
 
+const (
+	// expected1ProviderErrMsg is the error message for when the
+	// expected number of providers does not match the actual number
+	// of providers.
+	expected1ProviderErrMsg = "expected 1 provider, got %d"
+)
+
 var _ error = (*containerError)(nil)
 
 // containerError is a wrapper around an error which reports on some
@@ -30,13 +37,13 @@ func newContainerError(
 
 func (e *containerError) Error() string {
 	var msg = fmt.Sprintf(
-		"error in %s, on %s: %s",
+		"Error in %s: \n\t on %s \n\t got: %s \n\t\t",
 		e.sourceName,
 		e.resolvingType,
 		e.root.Error(),
 	)
 	if len(e.args) > 0 {
-		msg += fmt.Sprintf(" (%v)", e.args...)
+		msg += fmt.Sprintf("(%v)", e.args...)
 	}
 
 	return msg

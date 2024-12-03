@@ -27,7 +27,8 @@ func (g *DAG[VertexT]) Vertices() []VertexT {
 // AddVertex adds a new vertex to the DAG.
 func (g *DAG[VertexT]) AddVertex(v VertexT) error {
 	if g.hasVertex(v) {
-		return ErrVertexAlreadyExists
+		// return ErrVertexAlreadyExists
+		return nil
 	}
 
 	g.vertices[v.ID()] = v

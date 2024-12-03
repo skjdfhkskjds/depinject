@@ -39,8 +39,8 @@ var (
 	//                            Options
 	// ===============================================================
 
-	// WithWriter sets the writer to dump the container's info to.
-	WithWriter = depinject.WithWriter
+	// WithLogger sets the logger to dump the container's info to.
+	WithLogger = depinject.WithLogger
 
 	// Instructs the container to enable the use of sentinel
 	// structs in constructor arguments and parses the struct's
