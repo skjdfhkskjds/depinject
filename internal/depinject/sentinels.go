@@ -1,43 +1,74 @@
 package depinject
 
-// import (
-// 	"github.com/skjdfhkskjds/depinject/internal/depinject/types/node"
-// 	"github.com/skjdfhkskjds/depinject/internal/depinject/types/sentinels"
-// 	"github.com/skjdfhkskjds/depinject/internal/reflect"
-// )
+import (
+	"github.com/skjdfhkskjds/depinject/internal/depinject3/types"
+	"github.com/skjdfhkskjds/depinject/internal/reflect"
+)
 
-// // handleSentinelsForNode takes a given node, and injects the node's
-// // sentinels as new nodes into the container.
-// func (c *Container) handleSentinelsForNode(n *node.Node) error {
-// 	for _, dep := range n.Dependencies() {
-// 		if !sentinels.EmbedsIn(dep) {
-// 			continue
-// 		}
-// 		if err := c.handleIn(dep); err != nil {
-// 			return err
-// 		}
-// 	}
+type (
+	// Note: Embedding the sentinels needs to be at the top level
+	// of the struct, we do not check recursively.
+	In  struct{ _ sentinel }
+	Out struct{ _ sentinel }
 
-// 	return nil
-// }
+	// internal implementation to use for container resolution
+	sentinel struct{}
+)
 
-// // handleIn takes a type that is an input sentinel, and
-// // generates a new struct and constructor for it, which is
-// // then provided to the container.
-// //
-// // input sentinels are treated as additional nodes whose
-// // constructors are a maximal list of the struct's fields
-// func (c *Container) handleIn(t reflect.Type) error {
-// 	s, err := reflect.NewStruct(t)
-// 	if err != nil {
-// 		return err
-// 	}
+// embedsInSentinel returns true if any of the given node's parameters
+// embeds the In type.
+// Returns a list of struct types that embed the In type.
+func embedsInSentinel(node *types.Node) ([]*reflect.StructType, bool) {
+	var structs []*reflect.StructType
+	for _, dep := range node.Dependencies() {
+		if typeEmbedsSentinel(dep.Type, reflect.TypeOf(In{})) {
+			s, err := reflect.NewStruct(dep.Type)
+			if err != nil {
+				return nil, false
+			}
+			structs = append(structs, s)
+		}
+	}
 
-// 	node := node.NewFromFunc(s.Constructor())
-// 	if err = c.addNode(node); err != nil {
-// 		return err
-// 	}
-// 	c.hasIn = true
+	return structs, len(structs) > 0
+}
 
-// 	return nil
-// }
+// embedsOutSentinel returns true if any of the given node's outputs
+// embeds the Out type.
+// Returns a list of struct types that embed the Out type.
+func embedsOutSentinel(node *types.Node) ([]*reflect.StructType, bool) {
+	var structs []*reflect.StructType
+	for _, out := range node.Outputs() {
+		if typeEmbedsSentinel(out, reflect.TypeOf(Out{})) {
+			s, err := reflect.NewStruct(out)
+			if err != nil {
+				return nil, false
+			}
+			structs = append(structs, s)
+		}
+	}
+
+	return structs, len(structs) > 0
+}
+
+// typeEmbedsSentinel returns true if the given type embeds the sentinel type.
+// It returns false otherwise, including if the type is nil or exactly
+// the sentinel type itself.
+func typeEmbedsSentinel(t reflect.Type, sentinel reflect.Type) bool {
+	if t == nil || t == sentinel {
+		return false
+	}
+
+	// Check if the type is a struct
+	if t.Kind() != reflect.Struct {
+		return false
+	}
+
+	// Iterate through all fields of the struct
+	for i := 0; i < t.NumField(); i++ {
+		if t.Field(i).Type == sentinel {
+			return true
+		}
+	}
+	return false
+}

@@ -1,66 +1,61 @@
 package depinject
 
-// import (
-// 	"reflect"
+import (
+	"fmt"
 
-// 	"github.com/skjdfhkskjds/depinject/internal/depinject/types/errors"
-// )
+	"github.com/skjdfhkskjds/depinject/internal/reflect"
+)
 
-// const invokeErrorName = "invoke"
+const invokeErrorName = "invoke"
 
-// // Invoke resolves the container and extracts the resulting
-// // values from the container.
-// // It returns an error if the container is invalid (not resolvable), or
-// // if any of the requested output types are missing from the container.
-// func (c *Container) Invoke(outputs ...any) error {
-// 	var err error
+func (c *Container) Invoke(outputs ...any) error {
+	if !c.invokable {
+		var err error
+		if err = c.build(); err != nil {
+			return err
+		}
+		if err = c.resolve(); err != nil {
+			return err
+		}
+		c.invokable = true
+	}
 
-// 	// Build the directed edges in the graph
-// 	if err = c.build(); err != nil {
-// 		return err
-// 	}
+	for _, output := range outputs {
+		if err := c.invoke(output); err != nil {
+			return newContainerError(
+				err, invokeErrorName, reflect.TypeOf(output).Elem().String(),
+			)
+		}
+	}
+	return nil
+}
 
-// 	// Resolve the container
-// 	if err = c.resolve(); err != nil {
-// 		return err
-// 	}
+func (c *Container) invoke(output any) error {
+	// Infer the type of the output using reflect
+	outputType := reflect.TypeOf(output)
 
-// 	// Invoke the outputs
-// 	for _, output := range outputs {
-// 		if err = c.invoke(output); err != nil {
-// 			return err
-// 		}
-// 	}
-// 	return nil
-// }
+	// If the output is a pointer, get the element type
+	if outputType.Kind() == reflect.Ptr {
+		outputType = outputType.Elem()
+	}
 
-// // invoke resolves a single output from a fully built container.
-// // It assumes the container is complete and valid and thus returns
-// // an error if the output is not found.
-// // TODO: do just-in-time resolution of values in case container
-// // is superfluous.
-// func (c *Container) invoke(output any) error {
-// 	// Infer the type of the output using reflect
-// 	outputType := reflect.TypeOf(output)
+	// Search the registry for any value which matches the type of v
+	providers, err := c.registry.Lookup(outputType, false)
+	if err != nil {
+		return err
+	}
 
-// 	// If the output is a pointer, get the element type
-// 	if outputType.Kind() == reflect.Ptr {
-// 		outputType = outputType.Elem()
-// 	}
+	// TODO: add support for array referencing on invoke.
+	if len(providers) != 1 {
+		return fmt.Errorf("expected 1 provider, got %d", len(providers))
+	}
 
-// 	// Get the value of the output type in the container
-// 	node, err := c.registry.Get(outputType)
-// 	if err != nil {
-// 		return errors.New(err, invokeErrorName, outputType.String())
-// 	}
+	// Assign the value to the output
+	value, err := providers[0].ValueOf(outputType, c.inferInterfaces)
+	if err != nil {
+		return err
+	}
+	reflect.ValueOf(output).Elem().Set(value)
 
-// 	value, err := node.ValueOf(outputType)
-// 	if err != nil {
-// 		return errors.New(err, invokeErrorName, outputType.String())
-// 	}
-
-// 	// Assign the value to the output
-// 	reflect.ValueOf(output).Elem().Set(value)
-
-// 	return nil
-// }
+	return nil
+}
