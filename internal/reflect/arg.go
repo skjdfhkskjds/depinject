@@ -8,12 +8,6 @@ type Arg struct {
 	// The underlying type of a pointer, slice or array.
 	UnderlyingType Type
 
-	// Whether the argument is a pointer.
-	IsPointer bool
-
-	// Whether the argument is an interface.
-	IsInterface bool
-
 	// Whether the argument is variadic.
 	IsVariadic bool
 
@@ -35,11 +29,6 @@ func NewArg(t Type, isVariadic bool) *Arg {
 		arg.ArraySize = t.Len()
 	case reflect.Slice:
 		arg.IsSlice = true
-		arg.UnderlyingType = t.Elem()
-	case reflect.Interface:
-		arg.IsInterface = true
-	case reflect.Pointer:
-		arg.IsPointer = true
 		arg.UnderlyingType = t.Elem()
 	}
 
