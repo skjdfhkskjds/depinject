@@ -62,7 +62,7 @@ func NewContainer(opts ...Option) *Container {
 		opt(c)
 	}
 
-	c.graph = graph.NewDAG[*types.Node](c.inferLists)
+	c.graph = graph.NewDAG[*types.Node](!c.inferLists)
 	c.registry = types.NewRegistry(c.inferLists, c.inferInterfaces)
 	return c
 }
