@@ -48,9 +48,12 @@ func MakeNamedFunc(args []Type, ret []Type, fn func([]Value) []Value, prefix str
 	wrappedFunc, _ := WrapFunc(generatedFn)
 
 	// Generate a name for the function.
-	name := prefix + generatedFuncNamePrefix +
-		"(" + formatList(generatedFuncNameArgsPrefix, args) +
-		formatList(generatedFuncNameRetPrefix, ret) + ")"
+	name := fmt.Sprintf("%s%s(%s%s)",
+		prefix,
+		generatedFuncNamePrefix,
+		formatList(generatedFuncNameArgsPrefix, args),
+		formatList(generatedFuncNameRetPrefix, ret),
+	)
 	wrappedFunc.Name = name
 
 	return wrappedFunc
@@ -88,9 +91,6 @@ func WrapFunc(f any) (*Func, error) {
 	hasError := false
 	// Extract return value types
 	for i := 0; i < funcType.NumOut(); i++ {
-		// Check if the last return value is an error
-		// TODO: should we make this assumption? this is in
-		// accordance to best practices in Go but not guaranteed
 		if IsError(funcType.Out(i)) {
 			hasError = true
 		}

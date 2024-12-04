@@ -23,7 +23,6 @@ func WithInSentinel() Option {
 // Instructs the container to enable the use of sentinel
 // structs in constructor outputs and parses the struct's
 // fields as constructor outputs.
-// TODO: Not implemented yet.
 func WithOutSentinel() Option {
 	return func(c *Container) {
 		c.useOutSentinel = true

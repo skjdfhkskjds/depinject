@@ -11,8 +11,8 @@ func TestNewArg(t *testing.T) {
 		name          string
 		input         reflect.Type
 		wantIsArray   bool
-		wantIsSlice   bool
 		wantArraySize int
+		wantIsSlice   bool
 	}{
 		{
 			name:          "fixed length array",
@@ -58,11 +58,11 @@ func TestNewArg(t *testing.T) {
 			if arg.IsArray != tt.wantIsArray {
 				t.Errorf("IsArray = %v, want %v", arg.IsArray, tt.wantIsArray)
 			}
-			if arg.IsSlice != tt.wantIsSlice {
-				t.Errorf("IsSlice = %v, want %v", arg.IsSlice, tt.wantIsSlice)
-			}
 			if arg.ArraySize != tt.wantArraySize {
 				t.Errorf("ArraySize = %v, want %v", arg.ArraySize, tt.wantArraySize)
+			}
+			if arg.IsSlice != tt.wantIsSlice {
+				t.Errorf("IsSlice = %v, want %v", arg.IsSlice, tt.wantIsSlice)
 			}
 		})
 	}
