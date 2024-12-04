@@ -7,7 +7,8 @@ import (
 	"github.com/skjdfhkskjds/depinject/internal/reflect"
 )
 
-// The registry is responsible for retrieving all providers that
+// The registry is responsible for managing the relationship
+// between types and the nodes that provide them.
 type Registry struct {
 	// providers maps a particular argument to all the nodes
 	// which provide that argument.
