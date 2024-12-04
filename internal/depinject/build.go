@@ -9,8 +9,6 @@ import (
 const buildErrorName = "build"
 
 func (c *Container) build() error {
-	// TODO: add sentinel support
-
 	// iterate through every node in the graph and create incoming
 	// edges for each node's dependencies
 	for _, node := range c.graph.Vertices() {

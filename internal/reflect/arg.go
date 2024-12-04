@@ -35,7 +35,7 @@ func NewArg(t Type, isVariadic bool) *Arg {
 	return arg
 }
 
-// IsType returns whether the type t matches the argument type.
+// IsType returns whether the type matches the argument type.
 func (a *Arg) IsType(t Type, inferInterfaces bool) bool {
 	if a.IsArray && t.Kind() == a.Kind() && t.Len() == a.ArraySize {
 		return matchesType(t.Elem(), a.UnderlyingType, inferInterfaces)

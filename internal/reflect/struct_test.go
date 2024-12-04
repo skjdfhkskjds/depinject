@@ -42,7 +42,7 @@ func TestStruct_Constructor(t *testing.T) {
 	require.NoError(t, err)
 
 	constructor := s.Constructor()
-	err = constructor.Call(true, "test", 42, true)
+	err = constructor.Call(false, "test", 42, true)
 	require.NoError(t, err)
 
 	result := constructor.Ret
@@ -57,4 +57,38 @@ func TestStruct_Constructor(t *testing.T) {
 	// Call TestMethod and check the result
 	testMethodResult := constructedStruct.testMethod()
 	require.Equal(t, "test", testMethodResult)
+}
+
+func TestStruct_Constructor_Multiple(t *testing.T) {
+	for i := 0; i < 100; i++ {
+		TestStruct_Constructor(t)
+	}
+}
+
+func TestStruct_Provider(t *testing.T) {
+	testStructType := reflect.TypeOf(testStruct{})
+	s, err := reflect.NewStruct(testStructType)
+	require.NoError(t, err)
+
+	provider := s.Provider()
+	err = provider.Call(false,
+		testStruct{
+			Field1: "test",
+			Field2: 42,
+			Field3: true,
+		},
+	)
+	require.NoError(t, err)
+
+	result := provider.Ret
+	require.Len(t, result, 3)
+	require.Equal(t, "test", result[reflect.TypeOf("")].Interface())
+	require.Equal(t, 42, result[reflect.TypeOf(0)].Interface())
+	require.Equal(t, true, result[reflect.TypeOf(false)].Interface())
+}
+
+func TestStruct_Provider_Multiple(t *testing.T) {
+	for i := 0; i < 100; i++ {
+		TestStruct_Provider(t)
+	}
 }
