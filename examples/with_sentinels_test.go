@@ -78,7 +78,6 @@ func TestWithOutSentinels(t *testing.T) {
 	var fooBar *FooBar
 	require.NoError(t, container.Invoke(&fooBar))
 	fooBar.Print()
-	require.Nil(t, nil)
 }
 
 func TestWithOutSentinelsMultiple(t *testing.T) {
