@@ -4,8 +4,7 @@ import (
 	"testing"
 
 	"github.com/skjdfhkskjds/depinject"
-	"github.com/skjdfhkskjds/depinject/internal/test_utils"
-	"github.com/stretchr/testify/require"
+	"github.com/skjdfhkskjds/depinject/internal/testutils"
 )
 
 // This example demonstrates how to use the dependency injection
@@ -43,10 +42,10 @@ func TestWithInSentinels(t *testing.T) {
 	)
 
 	// Supply a value into the container directly.
-	require.NoError(t, container.Supply(&Foo{}))
+	testutils.RequireNoError(t, container.Supply(&Foo{}))
 
 	// Provide a set of constructors into the container.
-	require.NoError(t, container.Provide(
+	testutils.RequireNoError(t, container.Provide(
 		NewBar,
 		NewFooBarWithIn,
 	))
@@ -54,12 +53,12 @@ func TestWithInSentinels(t *testing.T) {
 	// Invoke a function with the dependencies injected
 	// to retrieve the FooBar instance.
 	var fooBar *FooBar
-	require.NoError(t, container.Invoke(&fooBar))
+	testutils.RequireNoError(t, container.Invoke(&fooBar))
 	fooBar.Print()
 }
 
 func TestWithInSentinelsMultiple(t *testing.T) {
-	test_utils.RunMultiWithoutSTDOUT(t, TestWithInSentinels, 100)
+	testutils.RunMultiWithoutSTDOUT(t, TestWithInSentinels, 100)
 }
 
 func TestWithOutSentinels(t *testing.T) {
@@ -68,7 +67,7 @@ func TestWithOutSentinels(t *testing.T) {
 	)
 
 	// Provide a set of constructors into the container.
-	require.NoError(t, container.Provide(
+	testutils.RequireNoError(t, container.Provide(
 		NewFooBarWithOut,
 		NewFooBar,
 	))
@@ -76,12 +75,12 @@ func TestWithOutSentinels(t *testing.T) {
 	// Invoke a function with the dependencies injected
 	// to retrieve the FooBar instance.
 	var fooBar *FooBar
-	require.NoError(t, container.Invoke(&fooBar))
+	testutils.RequireNoError(t, container.Invoke(&fooBar))
 	fooBar.Print()
 }
 
 func TestWithOutSentinelsMultiple(t *testing.T) {
-	test_utils.RunMultiWithoutSTDOUT(t, TestWithOutSentinels, 100)
+	testutils.RunMultiWithoutSTDOUT(t, TestWithOutSentinels, 100)
 }
 
 func TestWithInAndOutSentinels(t *testing.T) {
@@ -91,7 +90,7 @@ func TestWithInAndOutSentinels(t *testing.T) {
 	)
 
 	// Provide a set of constructors into the container.
-	require.NoError(t, container.Provide(
+	testutils.RequireNoError(t, container.Provide(
 		NewFooBarWithOut,
 		NewFooBarWithIn,
 	))
@@ -99,6 +98,6 @@ func TestWithInAndOutSentinels(t *testing.T) {
 	// Invoke a function with the dependencies injected
 	// to retrieve the FooBar instance.
 	var fooBar *FooBar
-	require.NoError(t, container.Invoke(&fooBar))
+	testutils.RequireNoError(t, container.Invoke(&fooBar))
 	fooBar.Print()
 }

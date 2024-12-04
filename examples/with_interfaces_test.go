@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/skjdfhkskjds/depinject"
-	"github.com/stretchr/testify/require"
+	"github.com/skjdfhkskjds/depinject/internal/testutils"
 )
 
 // This example demonstrates how to use the dependency injection
@@ -22,7 +22,7 @@ func TestWithInterfaces(t *testing.T) {
 	container := depinject.NewContainer(depinject.WithInterfaceInference())
 
 	// Provide a set of constructors into the container.
-	require.NoError(t, container.Provide(
+	testutils.RequireNoError(t, container.Provide(
 		NewFoo,
 		NewBar,
 		NewFooBarWithBarI,
@@ -31,6 +31,6 @@ func TestWithInterfaces(t *testing.T) {
 	// Invoke a function with the dependencies injected
 	// to retrieve the FooBar instance.
 	var fooBar FooBarI
-	require.NoError(t, container.Invoke(&fooBar))
+	testutils.RequireNoError(t, container.Invoke(&fooBar))
 	fooBar.Print()
 }

@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/skjdfhkskjds/depinject/internal/reflect"
+	"github.com/skjdfhkskjds/depinject/internal/testutils"
 )
 
 func TestNewArg(t *testing.T) {
@@ -54,16 +55,9 @@ func TestNewArg(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			arg := reflect.NewArg(tt.input, false)
-
-			if arg.IsArray != tt.wantIsArray {
-				t.Errorf("IsArray = %v, want %v", arg.IsArray, tt.wantIsArray)
-			}
-			if arg.ArraySize != tt.wantArraySize {
-				t.Errorf("ArraySize = %v, want %v", arg.ArraySize, tt.wantArraySize)
-			}
-			if arg.IsSlice != tt.wantIsSlice {
-				t.Errorf("IsSlice = %v, want %v", arg.IsSlice, tt.wantIsSlice)
-			}
+			testutils.RequireEquals(t, arg.IsArray, tt.wantIsArray)
+			testutils.RequireEquals(t, arg.ArraySize, tt.wantArraySize)
+			testutils.RequireEquals(t, arg.IsSlice, tt.wantIsSlice)
 		})
 	}
 }

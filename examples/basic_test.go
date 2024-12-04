@@ -1,11 +1,10 @@
 package examples
 
 import (
-	"reflect"
 	"testing"
 
 	"github.com/skjdfhkskjds/depinject"
-	"github.com/stretchr/testify/require"
+	"github.com/skjdfhkskjds/depinject/internal/testutils"
 )
 
 // This example demonstrates how to use the dependency injection
@@ -20,18 +19,13 @@ import (
 // into the container and request an instance of FooBar.
 
 func TestBasic(t *testing.T) {
-
-	type1 := reflect.TypeOf(&Foo{})
-	type2 := reflect.TypeOf(&Foo{})
-	require.True(t, type1 == type2)
-
 	container := depinject.NewContainer()
 
 	// Supply a value into the container directly.
-	require.NoError(t, container.Supply(&Foo{}))
+	testutils.RequireNoError(t, container.Supply(&Foo{}))
 
 	// Provide a set of constructors into the container.
-	require.NoError(t, container.Provide(
+	testutils.RequireNoError(t, container.Provide(
 		NewBar,
 		NewFooBar,
 	))
@@ -39,7 +33,7 @@ func TestBasic(t *testing.T) {
 	// Invoke a function with the dependencies injected
 	// to retrieve the FooBar instance.
 	var fooBar *FooBar
-	require.NoError(t, container.Invoke(&fooBar))
+	testutils.RequireNoError(t, container.Invoke(&fooBar))
 	fooBar.Print()
 }
 
@@ -47,10 +41,10 @@ func TestBasic(t *testing.T) {
 // create an explicit instance of the container.
 func TestBasicNoInstance(t *testing.T) {
 	// Supply a value into the container directly.
-	require.NoError(t, depinject.Supply(&Foo{}))
+	testutils.RequireNoError(t, depinject.Supply(&Foo{}))
 
 	// Provide a set of constructors into the container.
-	require.NoError(t, depinject.Provide(
+	testutils.RequireNoError(t, depinject.Provide(
 		NewBar,
 		NewFooBar,
 	))
@@ -58,7 +52,7 @@ func TestBasicNoInstance(t *testing.T) {
 	// Invoke a function with the dependencies injected
 	// to retrieve the FooBar instance.
 	var fooBar *FooBar
-	require.NoError(t, depinject.Invoke(&fooBar))
+	testutils.RequireNoError(t, depinject.Invoke(&fooBar))
 	fooBar.Print()
 }
 
@@ -69,16 +63,16 @@ func TestBasicMultiSupply(t *testing.T) {
 	container := depinject.NewContainer()
 
 	// Supply a value into the container directly.
-	require.NoError(t, container.Supply(&Foo{}, &Bar{}))
+	testutils.RequireNoError(t, container.Supply(&Foo{}, &Bar{}))
 
 	// Provide a set of constructors into the container.
-	require.NoError(t, container.Provide(
+	testutils.RequireNoError(t, container.Provide(
 		NewFooBar,
 	))
 
 	// Invoke a function with the dependencies injected
 	// to retrieve the FooBar instance.
 	var fooBar *FooBar
-	require.NoError(t, container.Invoke(&fooBar))
+	testutils.RequireNoError(t, container.Invoke(&fooBar))
 	fooBar.Print()
 }
