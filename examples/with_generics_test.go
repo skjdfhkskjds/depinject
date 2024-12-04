@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/skjdfhkskjds/depinject"
-	"github.com/stretchr/testify/require"
+	"github.com/skjdfhkskjds/depinject/internal/testutils"
 )
 
 // This example demonstrates how to use the dependency injection
@@ -28,10 +28,10 @@ func TestWithGenerics(t *testing.T) {
 	container := depinject.NewContainer()
 
 	// Supply a value into the container directly.
-	require.NoError(t, container.Supply(&Foo{}))
+	testutils.RequireNoError(t, container.Supply(&Foo{}))
 
 	// Provide a set of constructors into the container.
-	require.NoError(t, container.Provide(
+	testutils.RequireNoError(t, container.Provide(
 		NewBar,
 		NewFooBarGenerics[*Foo],
 	))
@@ -39,6 +39,6 @@ func TestWithGenerics(t *testing.T) {
 	// Invoke a function with the dependencies injected
 	// to retrieve the FooBarGenerics instance.
 	var fooBarGenerics *FooBarGenerics[*Foo]
-	require.NoError(t, container.Invoke(&fooBarGenerics))
+	testutils.RequireNoError(t, container.Invoke(&fooBarGenerics))
 	fooBarGenerics.Print()
 }

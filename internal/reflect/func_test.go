@@ -5,8 +5,7 @@ import (
 	"testing"
 
 	"github.com/skjdfhkskjds/depinject/internal/reflect"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
+	"github.com/skjdfhkskjds/depinject/internal/testutils"
 )
 
 const pkgPath = "github.com/skjdfhkskjds/depinject/internal/reflect_test."
@@ -103,14 +102,14 @@ func TestMakeNamedFunc(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			fn := reflect.MakeNamedFunc(tt.args, tt.ret, tt.fn, "")
-			assert.NotNil(t, fn)
+			testutils.RequireNotNil(t, fn)
 
-			assert.Equal(t, tt.wantNumIn, len(fn.Args))
-			assert.Equal(t, tt.wantNumOut, len(fn.Ret))
-			assert.Equal(t, tt.wantInTypes, fn.Args)
-			assert.Equal(t, tt.wantOutTypes, fn.Ret)
-			assert.Equal(t, fn.Name, tt.wantName)
-			assert.Equal(t, fn.HasError, tt.wantHasError)
+			testutils.RequireEquals(t, tt.wantNumIn, len(fn.Args))
+			testutils.RequireEquals(t, tt.wantNumOut, len(fn.Ret))
+			testutils.RequireEquals(t, tt.wantInTypes, fn.Args)
+			testutils.RequireEquals(t, tt.wantOutTypes, fn.Ret)
+			testutils.RequireEquals(t, fn.Name, tt.wantName)
+			testutils.RequireEquals(t, fn.HasError, tt.wantHasError)
 		})
 	}
 }
@@ -204,40 +203,20 @@ func TestWrapFunc(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			fn, err := reflect.WrapFunc(tt.input)
-			require.ErrorIs(
-				t, err, tt.err,
-				"NewFunc() error = %v, wantErr %v", err, tt.err,
-			)
+			testutils.RequireErrorIs(t, err, tt.err)
 			if err != nil {
 				return
 			}
-			require.Equal(
-				t, tt.wantName, fn.Name,
-				"NewFunc() function name = %s, want %s", fn.Name, tt.wantName,
-			)
-			require.Equal(
-				t, tt.wantHasError, fn.HasError,
-				"NewFunc() HasError = %t, want %t", fn.HasError, tt.wantHasError,
-			)
-			require.Equal(
-				t, len(fn.Args), tt.wantNumIn,
-				"NewFunc() number of inputs = %d, want %d", len(fn.Args), tt.wantNumIn,
-			)
-			require.Equal(
-				t, len(fn.Ret), tt.wantNumOut,
-				"NewFunc() number of outputs = %d, want %d", len(fn.Ret), tt.wantNumOut,
-			)
+
+			testutils.RequireEquals(t, tt.wantName, fn.Name)
+			testutils.RequireEquals(t, tt.wantHasError, fn.HasError)
+			testutils.RequireEquals(t, len(fn.Args), tt.wantNumIn)
+			testutils.RequireEquals(t, len(fn.Ret), tt.wantNumOut)
 			for i, arg := range fn.Args {
-				require.Equal(
-					t, tt.wantInTypes[i], arg,
-					"Input type mismatch at index %d", i,
-				)
+				testutils.RequireEquals(t, tt.wantInTypes[i], arg)
 			}
 			for outputType, ret := range fn.Ret {
-				require.Equal(
-					t, tt.wantOutTypes[outputType], ret,
-					"Output type mismatch, want %v, got %v", tt.wantOutTypes[outputType], ret,
-				)
+				testutils.RequireEquals(t, tt.wantOutTypes[outputType], ret)
 			}
 		})
 	}
@@ -286,26 +265,16 @@ func TestFunc_Call(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := tt.f.Call(true, tt.args...)
-			require.ErrorIs(
-				t, err, tt.err,
-				"Func.Call() error = %v, wantErr %v", err, tt.err,
-			)
+			testutils.RequireErrorIs(t, tt.f.Call(true, tt.args...), tt.err)
 
 			// Only check the output if the function has no error.
 			if tt.err == nil {
 				got := tt.f.Ret
-				require.Equal(
-					t, len(got), len(tt.output),
-					"Func.Call() got %d return values, want %d", len(got), len(tt.output),
-				)
+				testutils.RequireEquals(t, len(got), len(tt.output))
 
 				i := 0
 				for _, v := range got {
-					require.Equal(
-						t, tt.output[i], v.Interface(),
-						"Func.Call() got[%d] = %v, want %v", i, v.Interface(), tt.output[i],
-					)
+					testutils.RequireEquals(t, tt.output[i], v.Interface())
 					i++
 				}
 			}

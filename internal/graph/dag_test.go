@@ -5,8 +5,7 @@ import (
 	"testing"
 
 	"github.com/skjdfhkskjds/depinject/internal/graph"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
+	"github.com/skjdfhkskjds/depinject/internal/testutils"
 )
 
 type testVertex struct {
@@ -20,29 +19,27 @@ func (v testVertex) ID() string {
 func TestDAG(t *testing.T) {
 	t.Run("NewDAG", func(t *testing.T) {
 		dag := graph.NewDAG[testVertex](false)
-		assert.NotNil(t, dag)
+		testutils.RequireNotNil(t, dag)
 	})
 
 	t.Run("Vertices", func(t *testing.T) {
 		dag := graph.NewDAG[testVertex](false)
-		assert.Empty(t, dag.Vertices())
+		testutils.RequireEmpty(t, dag.Vertices())
 
 		v1 := testVertex{id: "1"}
 		v2 := testVertex{id: "2"}
 		dag.AddVertex(v1)
 		dag.AddVertex(v2)
-		assert.Equal(t, []testVertex{v1, v2}, dag.Vertices())
+		testutils.RequireEquals(t, []testVertex{v1, v2}, dag.Vertices())
 	})
 
 	t.Run("AddVertex", func(t *testing.T) {
 		dag := graph.NewDAG[testVertex](true)
 		v := testVertex{id: "1"}
-		err := dag.AddVertex(v)
-		assert.NoError(t, err)
+		testutils.RequireNoError(t, dag.AddVertex(v))
 
 		// Adding the same vertex again should return an error
-		err = dag.AddVertex(v)
-		assert.ErrorIs(t, err, graph.ErrVertexAlreadyExists)
+		testutils.RequireErrorIs(t, dag.AddVertex(v), graph.ErrVertexAlreadyExists)
 	})
 
 	t.Run("AddEdge", func(t *testing.T) {
@@ -50,17 +47,12 @@ func TestDAG(t *testing.T) {
 		v1 := testVertex{id: "1"}
 		v2 := testVertex{id: "2"}
 
-		err := dag.AddVertex(v1)
-		assert.NoError(t, err)
-		err = dag.AddVertex(v2)
-		assert.NoError(t, err)
-
-		err = dag.AddEdge(v1, v2)
-		assert.NoError(t, err)
+		testutils.RequireNoError(t, dag.AddVertex(v1))
+		testutils.RequireNoError(t, dag.AddVertex(v2))
+		testutils.RequireNoError(t, dag.AddEdge(v1, v2))
 
 		// Adding an edge that would create a cycle should return an error
-		err = dag.AddEdge(v2, v1)
-		assert.ErrorIs(t, err, graph.ErrAcyclicConstraintViolation)
+		testutils.RequireErrorIs(t, dag.AddEdge(v2, v1), graph.ErrAcyclicConstraintViolation)
 	})
 
 	t.Run("TopologicalSort", func(t *testing.T) {
@@ -69,16 +61,16 @@ func TestDAG(t *testing.T) {
 		v2 := testVertex{id: "2"}
 		v3 := testVertex{id: "3"}
 
-		require.NoError(t, dag.AddVertex(v1))
-		require.NoError(t, dag.AddVertex(v2))
-		require.NoError(t, dag.AddVertex(v3))
+		testutils.RequireNoError(t, dag.AddVertex(v1))
+		testutils.RequireNoError(t, dag.AddVertex(v2))
+		testutils.RequireNoError(t, dag.AddVertex(v3))
 
-		require.NoError(t, dag.AddEdge(v1, v2))
-		require.NoError(t, dag.AddEdge(v2, v3))
+		testutils.RequireNoError(t, dag.AddEdge(v1, v2))
+		testutils.RequireNoError(t, dag.AddEdge(v2, v3))
 
 		sorted, err := dag.TopologicalSort()
-		assert.NoError(t, err)
-		assert.Equal(t, []testVertex{v1, v2, v3}, sorted)
+		testutils.RequireNoError(t, err)
+		testutils.RequireEquals(t, []testVertex{v1, v2, v3}, sorted)
 	})
 }
 
