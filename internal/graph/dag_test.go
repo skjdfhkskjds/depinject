@@ -42,6 +42,19 @@ func TestDAG(t *testing.T) {
 		testutils.RequireErrorIs(t, dag.AddVertex(v), graph.ErrVertexAlreadyExists)
 	})
 
+	t.Run("AddVertex With RepeatedVertices", func(t *testing.T) {
+		dag := graph.NewDAG[testVertex](false)
+		repeatedVertices := []testVertex{
+			{id: "2"},
+			{id: "2"},
+			{id: "2"},
+		}
+
+		for _, v := range repeatedVertices {
+			testutils.RequireNoError(t, dag.AddVertex(v))
+		}
+	})
+
 	t.Run("AddEdge", func(t *testing.T) {
 		dag := graph.NewDAG[testVertex](false)
 		v1 := testVertex{id: "1"}

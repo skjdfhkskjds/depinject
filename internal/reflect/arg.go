@@ -19,11 +19,10 @@ type Arg struct {
 func NewArg(t Type, isVariadic bool) *Arg {
 	arg := &Arg{Type: t, IsVariadic: isVariadic}
 
-	switch t.Kind() {
-	case reflect.Array:
+	if t.Kind() == reflect.Array {
 		arg.IsArray = true
 		arg.ArraySize = t.Len()
-	case reflect.Slice:
+	} else if t.Kind() == reflect.Slice || isVariadic {
 		arg.IsSlice = true
 	}
 

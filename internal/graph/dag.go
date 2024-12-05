@@ -1,9 +1,16 @@
 package graph
 
 type DAG[VertexT Vertex] struct {
-	vertices map[string]VertexT
+	// vertices is a map of vertex IDs to vertices.
+	// Under the uniqueness constraint, each vertex ID maps to a single
+	// vertex. Without uniqueness, the directed graph is calculated with
+	// only a single vertex, but returns the whole set of vertices in order
+	// when topologically sorted.
+	vertices map[string][]VertexT
 	edges    map[string][]VertexT
 	indegree map[string]int
+
+	totalVertices int
 
 	enforceUniqueVertices bool
 }
@@ -11,7 +18,7 @@ type DAG[VertexT Vertex] struct {
 // NewDAG creates a new empty DAG.
 func NewDAG[VertexT Vertex](enforceUniqueVertices bool) *DAG[VertexT] {
 	return &DAG[VertexT]{
-		vertices:              make(map[string]VertexT),
+		vertices:              make(map[string][]VertexT),
 		edges:                 make(map[string][]VertexT),
 		indegree:              make(map[string]int),
 		enforceUniqueVertices: enforceUniqueVertices,
@@ -20,24 +27,30 @@ func NewDAG[VertexT Vertex](enforceUniqueVertices bool) *DAG[VertexT] {
 
 // Vertices returns all vertices in the DAG.
 func (g *DAG[VertexT]) Vertices() []VertexT {
-	vertices := make([]VertexT, 0, len(g.vertices))
+	vertices := make([]VertexT, g.totalVertices)
+	i := 0
 	for _, v := range g.vertices {
-		vertices = append(vertices, v)
+		for _, vv := range v {
+			vertices[i] = vv
+			i++
+		}
 	}
 	return vertices
 }
 
 // AddVertex adds a new vertex to the DAG.
 func (g *DAG[VertexT]) AddVertex(v VertexT) error {
-	if g.hasVertex(v) {
-		if g.enforceUniqueVertices {
-			return ErrVertexAlreadyExists
-		}
-		return nil
+	if g.hasVertex(v) && g.enforceUniqueVertices {
+		return ErrVertexAlreadyExists
 	}
 
-	g.vertices[v.ID()] = v
+	if _, ok := g.vertices[v.ID()]; !ok {
+		g.vertices[v.ID()] = make([]VertexT, 0)
+	}
+
+	g.vertices[v.ID()] = append(g.vertices[v.ID()], v)
 	g.indegree[v.ID()] = 0
+	g.totalVertices++
 	return nil
 }
 
@@ -78,7 +91,7 @@ func (g *DAG[VertexT]) TopologicalSort() ([]VertexT, error) {
 	for len(queue) > 0 {
 		v := queue[0]
 		queue = queue[1:]
-		sorted = append(sorted, g.vertices[v])
+		sorted = append(sorted, g.vertices[v]...)
 
 		// For each outgoing edge from 'v', reduce indegree and
 		// enqueue if it becomes zero
@@ -91,7 +104,7 @@ func (g *DAG[VertexT]) TopologicalSort() ([]VertexT, error) {
 	}
 
 	// Check if we could process all vertices (DAG should have no cycles)
-	if len(sorted) != len(g.vertices) {
+	if len(sorted) != g.totalVertices {
 		return nil, ErrAcyclicConstraintViolation
 	}
 	return sorted, nil

@@ -1,6 +1,9 @@
 package examples
 
-import "fmt"
+import (
+	"errors"
+	"fmt"
+)
 
 /* -------------------------------------------------------------------------- */
 /*                                Hard Types                                  */
@@ -25,6 +28,40 @@ func NewFooBar(_ *Foo, _ *Bar) *FooBar {
 }
 
 func (f *FooBar) Print() {
+	fmt.Println("Hello from FooBar!")
+}
+
+type FooBarGenerics[FooT any] struct {
+	foo FooT
+	bar *Bar
+}
+
+type FooBarGenericsOption[FooT any] func(*FooBarGenerics[FooT])
+
+func WithFoo[FooT any](foo FooT) FooBarGenericsOption[FooT] {
+	return func(fb *FooBarGenerics[FooT]) {
+		fb.foo = foo
+	}
+}
+
+func NewFooBarGenerics[FooT any]() *FooBarGenerics[FooT] {
+	return &FooBarGenerics[FooT]{}
+}
+
+func NewFooBarGenericsWithOptions[FooT any](
+	opts ...FooBarGenericsOption[FooT],
+) (*FooBarGenerics[FooT], error) {
+	if len(opts) == 0 {
+		return nil, errors.New("no options provided")
+	}
+	fb := &FooBarGenerics[FooT]{}
+	for _, opt := range opts {
+		opt(fb)
+	}
+	return fb, nil
+}
+
+func (fb *FooBarGenerics[FooT]) Print() {
 	fmt.Println("Hello from FooBar!")
 }
 

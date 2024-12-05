@@ -1,7 +1,6 @@
 package examples
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/skjdfhkskjds/depinject"
@@ -10,19 +9,6 @@ import (
 
 // This example demonstrates how to use the dependency injection
 // framework to inject and resolve types that contain generic types.
-
-type FooBarGenerics[FooT any] struct {
-	foo FooT
-	bar *Bar
-}
-
-func NewFooBarGenerics[FooT any]() *FooBarGenerics[FooT] {
-	return &FooBarGenerics[FooT]{}
-}
-
-func (fb *FooBarGenerics[FooT]) Print() {
-	fmt.Println("Hello from FooBar!")
-}
 
 func TestWithGenerics(t *testing.T) {
 	container := depinject.NewContainer()
@@ -40,5 +26,6 @@ func TestWithGenerics(t *testing.T) {
 	// to retrieve the FooBarGenerics instance.
 	var fooBarGenerics *FooBarGenerics[*Foo]
 	testutils.RequireNoError(t, container.Invoke(&fooBarGenerics))
+	testutils.RequireNotNil(t, fooBarGenerics)
 	fooBarGenerics.Print()
 }
