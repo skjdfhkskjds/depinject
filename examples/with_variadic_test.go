@@ -26,6 +26,7 @@ func TestWithVariadicNoArgs(t *testing.T) {
 
 	var fooBar *FooBar
 	testutils.RequireNoError(t, container.Invoke(&fooBar))
+	testutils.RequireNotNil(t, fooBar)
 	fooBar.Print()
 }
 
@@ -34,6 +35,11 @@ func TestWithVariadicOneArg(t *testing.T) {
 
 	testutils.RequireNoError(t, container.Supply(&Foo{}, &Bar{}))
 	testutils.RequireNoError(t, container.Provide(NewFooBarVariadic))
+
+	var fooBar *FooBar
+	testutils.RequireNoError(t, container.Invoke(&fooBar))
+	testutils.RequireNotNil(t, fooBar)
+	fooBar.Print()
 }
 
 func TestWithVariadicMultipleArgs(t *testing.T) {
@@ -41,6 +47,11 @@ func TestWithVariadicMultipleArgs(t *testing.T) {
 
 	testutils.RequireNoError(t, container.Supply(&Foo{}))
 	testutils.RequireNoError(t, container.Provide(NewMultiBar, NewFooBarVariadic))
+
+	var fooBar *FooBar
+	testutils.RequireNoError(t, container.Invoke(&fooBar))
+	testutils.RequireNotNil(t, fooBar)
+	fooBar.Print()
 }
 
 func TestWithVariadicInferredListInSupply(t *testing.T) {
@@ -61,14 +72,16 @@ func TestWithVariadicInferredListInSupply(t *testing.T) {
 func TestWithVariadicInferredListInProvide(t *testing.T) {
 	container := depinject.NewContainer(depinject.WithListInference())
 
+	testutils.RequireNoError(t, container.Supply(NewFoo()))
 	testutils.RequireNoError(t, container.Provide(
-		depinject.NewContainer,
-		depinject.WithInterfaceInference(),
-		depinject.WithListInference(),
-		depinject.WithInSentinel(),
+		NewBar,
+		NewBar,
+		NewBar,
+		NewFooBarVariadic,
 	))
 
-	var container2 *depinject.Container
-	testutils.RequireNoError(t, container.Invoke(&container2))
-	testutils.RequireNotNil(t, container2)
+	var fooBarVariadic *FooBar
+	testutils.RequireNoError(t, container.Invoke(&fooBarVariadic))
+	testutils.RequireNotNil(t, fooBarVariadic)
+	fooBarVariadic.Print()
 }

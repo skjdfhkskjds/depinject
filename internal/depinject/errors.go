@@ -9,6 +9,14 @@ const (
 	// expected number of providers does not match the actual number
 	// of providers.
 	expected1ProviderErrMsg = "expected 1 provider, got %d"
+
+	// expectedArraySizeErrMsg is the error message for when the expected
+	// array size does not match the actual array size.
+	expectedArraySizeErrMsg = "expected array size %d, got %d"
+
+	// sliceElementTypesMismatchErrMsg is the error message for when the
+	// element types of a slice do not match the expected type.
+	sliceElementTypesMismatchErrMsg = "slice element types mismatch: %s != %s"
 )
 
 var _ error = (*containerError)(nil)

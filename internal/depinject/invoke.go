@@ -53,7 +53,7 @@ func (c *Container) invoke(output any) error {
 	}
 
 	// Assign the value to the output
-	value, err := providers[0].ValueOf(outputType, c.inferInterfaces)
+	value, err := providers[0].ValueOf(outputType, false, c.inferInterfaces)
 	if err != nil {
 		return err
 	}

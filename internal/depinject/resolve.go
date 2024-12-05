@@ -30,25 +30,40 @@ func (c *Container) resolveNode(node *types.Node) error {
 		if err != nil {
 			return err
 		}
+
+		// If the dependency is a variadic argument and there are no
+		// providers, we can skip the dependency.
+		if len(providers) == 0 && dep.IsVariadic {
+			continue
+		}
+
 		var value reflect.Value
 
 		// If the dependency is an array or slice, create a slice of the
 		// appropriate size and set the values from the providers.
-		if c.inferLists && ((dep.IsArray && len(providers) == dep.ArraySize) || dep.IsSlice) {
+		if c.inferLists && (dep.IsArray || dep.IsSlice) {
+			// Validate that the number of providers matches the expected size.
+			if dep.IsArray && len(providers) != dep.ArraySize {
+				return errors.Newf(
+					expectedArraySizeErrMsg, dep.ArraySize, len(providers),
+				)
+			}
+
 			value, err = newSliceOfDep(dep, providers, c.inferInterfaces)
 			if err != nil {
 				return err
 			}
-			continue
-		} else if len(providers) == 0 && dep.IsVariadic {
-			continue
 		} else if len(providers) != 1 {
+			// If the dependency is not a list or slice and not variadic and
+			// there is not exactly one provider, return an error.
 			return errors.Newf(expected1ProviderErrMsg, len(providers))
-		}
-
-		value, err = providers[0].ValueOf(dep.Type, c.inferInterfaces)
-		if err != nil {
-			return err
+		} else {
+			// Otherwise, get the value from the provider. At this point, if the
+			// dependency is a list or a slice, it must be provided exactly as is.
+			value, err = providers[0].ValueOf(dep.Type, false, c.inferInterfaces)
+			if err != nil {
+				return err
+			}
 		}
 
 		values = append(values, value.Interface())
@@ -63,20 +78,23 @@ func (c *Container) resolveNode(node *types.Node) error {
 
 // newSliceOfDep creates a slice of the given dependency type with the
 // appropriate size and sets the values from the providers.
+// Note: this function is only even called if c.inferLists is true.
 func newSliceOfDep(
 	dep *reflect.Arg, providers []*types.Node, inferInterfaces bool,
 ) (reflect.Value, error) {
-	slice := reflect.MakeSlice(
-		dep.Type,
-		len(providers),
-		max(len(providers), dep.ArraySize),
-	)
-	for j, provider := range providers {
-		providerValue, err := provider.ValueOf(dep.Type, inferInterfaces)
+	var values []reflect.Value
+	for _, provider := range providers {
+		providerValue, err := provider.ValueOf(dep.Type, true, inferInterfaces)
 		if err != nil {
 			return reflect.Value{}, err
+		} else if dep.Type.Elem() != providerValue.Type() {
+			return reflect.Value{}, errors.Newf(
+				sliceElementTypesMismatchErrMsg,
+				dep.Type,
+				providerValue.Type(),
+			)
 		}
-		slice.Index(j).Set(providerValue)
+		values = append(values, providerValue)
 	}
-	return slice, nil
+	return reflect.MakeInitializedSlice(dep.Type, values...), nil
 }

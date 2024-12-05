@@ -1,9 +1,9 @@
 package reflect_test
 
 import (
-	"errors"
 	"testing"
 
+	"github.com/skjdfhkskjds/depinject/internal/errors"
 	"github.com/skjdfhkskjds/depinject/internal/reflect"
 	"github.com/skjdfhkskjds/depinject/internal/testutils"
 )
@@ -31,6 +31,8 @@ func divide(a, b int) (int, error) {
 	}
 	return a / b, nil
 }
+
+func takesAny(v any) {}
 
 // TestMakeNamedFunc tests the creation of a new Func instance using MakeNamedFunc.
 func TestMakeNamedFunc(t *testing.T) {
@@ -95,7 +97,7 @@ func TestMakeNamedFunc(t *testing.T) {
 			wantNumOut:   0,
 			wantInTypes:  []*reflect.Arg{},
 			wantOutTypes: map[reflect.Type]reflect.Value{},
-			wantName:     "GeneratedFunc(Args{}Returns{})",
+			wantName:     "GeneratedFunc()",
 		},
 	}
 
@@ -225,7 +227,9 @@ func TestWrapFunc(t *testing.T) {
 // TestFunc_Call tests the Call method of the Func type.
 func TestFunc_Call(t *testing.T) {
 	addFn, _ := reflect.WrapFunc(add1)
+	addMultiFn, _ := reflect.WrapFunc(addMulti)
 	divideFn, _ := reflect.WrapFunc(divide)
+	takesAnyFn, _ := reflect.WrapFunc(takesAny)
 	tests := []struct {
 		name   string
 		f      *reflect.Func
@@ -261,22 +265,43 @@ func TestFunc_Call(t *testing.T) {
 			output: []any{5, (error)(nil)},
 			err:    nil,
 		},
+		{
+			name:   "invalid argument value",
+			f:      takesAnyFn,
+			args:   []any{nil},
+			output: nil,
+			err:    errors.Newf(reflect.ArgValueIsZeroErrMsg, "interface {}"),
+		},
+		{
+			name:   "variadic function",
+			f:      addMultiFn,
+			args:   []any{[]int{1, 2, 3}},
+			output: []any{6},
+			err:    nil,
+		},
+		{
+			name:   "variadic function with no variadic argument",
+			f:      addMultiFn,
+			args:   []any{[]int{}},
+			output: []any{0},
+			err:    nil,
+		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			testutils.RequireErrorIs(t, tt.f.Call(true, tt.args...), tt.err)
+			if tt.err != nil {
+				return
+			}
 
-			// Only check the output if the function has no error.
-			if tt.err == nil {
-				got := tt.f.Ret
-				testutils.RequireEquals(t, len(got), len(tt.output))
+			got := tt.f.Ret
+			testutils.RequireEquals(t, len(got), len(tt.output))
 
-				i := 0
-				for _, v := range got {
-					testutils.RequireEquals(t, tt.output[i], v.Interface())
-					i++
-				}
+			i := 0
+			for _, v := range got {
+				testutils.RequireEquals(t, v.Interface(), tt.output[i])
+				i++
 			}
 		})
 	}

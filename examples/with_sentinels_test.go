@@ -54,6 +54,7 @@ func TestWithInSentinels(t *testing.T) {
 	// to retrieve the FooBar instance.
 	var fooBar *FooBar
 	testutils.RequireNoError(t, container.Invoke(&fooBar))
+	testutils.RequireNotNil(t, fooBar)
 	fooBar.Print()
 }
 
@@ -76,6 +77,7 @@ func TestWithOutSentinels(t *testing.T) {
 	// to retrieve the FooBar instance.
 	var fooBar *FooBar
 	testutils.RequireNoError(t, container.Invoke(&fooBar))
+	testutils.RequireNotNil(t, fooBar)
 	fooBar.Print()
 }
 
@@ -99,5 +101,6 @@ func TestWithInAndOutSentinels(t *testing.T) {
 	// to retrieve the FooBar instance.
 	var fooBar *FooBar
 	testutils.RequireNoError(t, container.Invoke(&fooBar))
+	testutils.RequireNotNil(t, fooBar)
 	fooBar.Print()
 }

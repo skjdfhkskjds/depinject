@@ -2,6 +2,8 @@ package reflect
 
 import (
 	"reflect"
+
+	"github.com/skjdfhkskjds/depinject/internal/utils"
 )
 
 type StructType struct {
@@ -9,11 +11,8 @@ type StructType struct {
 
 	Type Type
 
-	// Note: We need to keep this duplicate mapping in order to
-	// maintaining consistent iterative field order while also
-	// decoupling the fields list from the comprehensive field list.
-	Fields        []Type
-	FieldsToIndex map[Type]int
+	// Fields is a mapping of field types to their indices.
+	Fields *utils.OrderedMap[Type, int]
 }
 
 func NewStruct(s any) (*StructType, error) {
@@ -23,30 +22,28 @@ func NewStruct(s any) (*StructType, error) {
 	}
 
 	// Loop through each field
-	fields := make([]Type, t.NumField())
-	fieldsToIndex := make(map[Type]int)
+	fields := utils.NewOrderedMap[Type, int]()
 	for i := 0; i < t.NumField(); i++ {
-		fields[i] = t.Field(i).Type
-		fieldsToIndex[t.Field(i).Type] = i
+		fields.Set(t.Field(i).Type, i)
 	}
 
 	return &StructType{
-		Name:          t.Name(),
-		Type:          t,
-		Fields:        fields,
-		FieldsToIndex: fieldsToIndex,
+		Name:   t.Name(),
+		Type:   t,
+		Fields: fields,
 	}, nil
 }
 
 // Constructor returns a function that constructs a new instance of the struct.
 func (s *StructType) Constructor() *Func {
 	return MakeNamedFunc(
-		s.Fields,
+		s.Fields.Keys(),
 		[]Type{s.Type},
 		func(args []Value) []Value {
 			structValue := reflect.New(s.Type).Elem()
 			for _, arg := range args {
-				structValue.Field(s.FieldsToIndex[arg.Type()]).Set(arg)
+				index, _ := s.Fields.Get(arg.Type())
+				structValue.Field(index).Set(arg)
 			}
 			return []Value{structValue}
 		},
@@ -59,12 +56,13 @@ func (s *StructType) Constructor() *Func {
 func (s *StructType) Provider() *Func {
 	return MakeNamedFunc(
 		[]Type{s.Type},
-		s.Fields,
+		s.Fields.Keys(),
 		func(args []Value) []Value {
 			structValue := args[0]
 			outputs := make([]Value, 0)
-			for _, t := range s.Fields {
-				outputs = append(outputs, structValue.Field(s.FieldsToIndex[t]))
+			for _, t := range s.Fields.Keys() {
+				index, _ := s.Fields.Get(t)
+				outputs = append(outputs, structValue.Field(index))
 			}
 			return outputs
 		},

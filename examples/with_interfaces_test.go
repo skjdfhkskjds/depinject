@@ -32,5 +32,6 @@ func TestWithInterfaces(t *testing.T) {
 	// to retrieve the FooBar instance.
 	var fooBar FooBarI
 	testutils.RequireNoError(t, container.Invoke(&fooBar))
+	testutils.RequireNotNil(t, fooBar)
 	fooBar.Print()
 }

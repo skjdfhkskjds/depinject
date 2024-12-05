@@ -1,11 +1,12 @@
 package reflect
 
 import (
-	"errors"
 	"fmt"
 	"reflect"
 	"runtime"
 	"strings"
+
+	"github.com/skjdfhkskjds/depinject/internal/errors"
 )
 
 const (
@@ -103,20 +104,22 @@ func WrapFunc(f any) (*Func, error) {
 
 // Call calls the original function with the given arguments.
 func (f *Func) Call(inferInterfaces bool, args ...any) error {
-	if err := validateCallArgs(
+	in, err := buildAndValidateCallArgs(
 		args, f.Args, f.IsVariadic, inferInterfaces,
-	); err != nil {
+	)
+	if err != nil {
 		return err
 	}
 
-	// Get the arguments as Values
-	in := make([]Value, len(args))
-	for i, arg := range args {
-		in[i] = ValueOf(arg)
-	}
-
 	// Call the function
-	res := f.fn.Call(in)
+	var res []Value
+	// If the function is variadic and the variadic argument is not
+	// empty, call the function with the variadic argument as a slice.
+	if f.IsVariadic && len(in) >= len(f.Args) {
+		res = f.fn.CallSlice(in)
+	} else {
+		res = f.fn.Call(in)
+	}
 	if len(res) == 0 {
 		return nil
 	}
@@ -146,10 +149,11 @@ func GetFunctionName(f any) string {
 	return runtime.FuncForPC(ValueOf(f).Pointer()).Name()
 }
 
-// validateArgs validates the arguments against the expected types.
-func validateCallArgs(
+// buildAndValidateCallArgs validates the arguments against the expected types
+// and returns a list of built arguments.
+func buildAndValidateCallArgs(
 	args []any, expected []*Arg, isVariadic, inferInterfaces bool,
-) error {
+) ([]Value, error) {
 	lastIndex := len(expected) - 1
 
 	// If the number of arguments is not equal to the number of expected
@@ -157,8 +161,11 @@ func validateCallArgs(
 	// variadic but the number of arguments is less than the number of
 	// expected arguments minus one, return an error.
 	if len(args) != len(expected) && !(isVariadic && len(args) >= lastIndex) {
-		return ErrWrongNumArgs
+		return nil, ErrWrongNumArgs
 	}
+
+	// Build the arguments as Values
+	callArgValues := make([]Value, len(args))
 
 	// Check argument type matching.
 	for i, e := range expected {
@@ -169,14 +176,14 @@ func validateCallArgs(
 			// If the function is variadic, the last argument
 			// is a slice of the remaining arguments.
 			// Variadic case with no inputs is valid.
-			if len(args)-i == 0 {
+			if len(args) == i {
 				continue
 			}
 
 			// Check the argument types from the remaining arguments.
 			for _, arg := range args[i:] {
 				if !e.IsType(TypeOf(arg), inferInterfaces) {
-					return fmt.Errorf(
+					return nil, errors.Newf(
 						"%w: got %s, expected %s",
 						ErrInvalidArgType,
 						TypeOf(arg).String(),
@@ -186,18 +193,27 @@ func validateCallArgs(
 			}
 		}
 
+		argValue := ValueOf(args[i])
+		if !argValue.IsValid() {
+			return nil, errors.Newf(ArgValueIsZeroErrMsg, e.String())
+		}
+
 		// Check if the argument matches the expected type.
 		if !e.IsType(TypeOf(args[i]), inferInterfaces) {
-			return fmt.Errorf(
+			return nil, errors.Newf(
 				"%w: got %s, expected %s",
 				ErrInvalidArgType,
 				TypeOf(args[i]).String(),
 				e.String(),
 			)
 		}
+
+		// If the argument matches the expected type, add the argument
+		// as a Value to the list of arguments.
+		callArgValues[i] = argValue
 	}
 
-	return nil
+	return callArgValues, nil
 }
 
 // argIsVariadic returns whether the argument at the given index is variadic.
@@ -207,6 +223,10 @@ func (f *Func) argIsVariadic(index int) bool {
 
 // formatList formats a list of types as a string.
 func formatList(prefix string, list []reflect.Type) string {
+	if len(list) == 0 {
+		return ""
+	}
+
 	types := make([]string, len(list))
 	for i, t := range list {
 		types[i] = t.String()

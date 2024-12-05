@@ -48,7 +48,6 @@ func (r *Registry) Register(node *Node) error {
 
 // Lookup returns all the nodes which provide the given type.
 // Contract:
-//   - len([]*types.Node) >= 1 iff error == nil
 //   - if inferInterfaces is true, this node will be registered as
 //     a provider for ALL registered types which are assignable by
 //     an output of this node.
@@ -60,7 +59,7 @@ func (r *Registry) Lookup(requested reflect.Type, optional bool) ([]*Node, error
 			allProviders = append(allProviders, providers...)
 		}
 	}
-	if len(allProviders) == 0 && !optional {
+	if !optional && len(allProviders) == 0 {
 		return nil, errors.Newf(noProvidersErrMsg, requested)
 	}
 	return allProviders, nil
@@ -83,15 +82,27 @@ func (r *Registry) Dump() string {
 // the registry that implements t, then [t, A] is returned.
 func (r *Registry) allMatchingTypes(t reflect.Type) []reflect.Type {
 	types := []reflect.Type{t}
-	if !r.inferInterfaces {
-		return types
+
+	var internalType reflect.Type
+	if r.inferLists && (t.Kind() == reflect.Slice || t.Kind() == reflect.Array) {
+		internalType = t.Elem()
 	}
 
 	for existingType := range r.providers {
 		if t == existingType {
 			continue
+		} else if internalType != nil && internalType == existingType {
+			types = append(types, existingType)
+		}
+
+		// Only check assignability if we are inferring interfaces.
+		if !r.inferInterfaces {
+			continue
 		}
 		if existingType.AssignableTo(t) {
+			types = append(types, existingType)
+		}
+		if internalType != nil && existingType.AssignableTo(internalType) {
 			types = append(types, existingType)
 		}
 	}

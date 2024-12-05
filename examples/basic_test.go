@@ -74,5 +74,6 @@ func TestBasicMultiSupply(t *testing.T) {
 	// to retrieve the FooBar instance.
 	var fooBar *FooBar
 	testutils.RequireNoError(t, container.Invoke(&fooBar))
+	testutils.RequireNotNil(t, fooBar)
 	fooBar.Print()
 }

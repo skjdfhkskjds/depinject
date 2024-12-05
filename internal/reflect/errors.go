@@ -14,4 +14,7 @@ var (
 
 	// ErrInvalidArgType is returned when an argument type is invalid.
 	ErrInvalidArgType = errors.New("invalid argument type")
+
+	// ArgValueIsZeroErrMsg is the error message for an invalid argument value.
+	ArgValueIsZeroErrMsg = "invalid argument value for type %s: got zero value"
 )
