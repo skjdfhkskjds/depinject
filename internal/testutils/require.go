@@ -46,6 +46,13 @@ func RequireTrue(t *testing.T, value bool) {
 	}
 }
 
+func RequireFalse(t *testing.T, value bool) {
+	if value {
+		t.Helper()
+		t.Fatalf("expected value to be false")
+	}
+}
+
 func RequireEquals(t *testing.T, actual, expected any) {
 	if !reflect.DeepEqual(expected, actual) {
 		t.Helper()

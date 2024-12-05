@@ -82,9 +82,7 @@ func structsForSentinelByType(
 			isNotSentinel := func(t reflect.Type) bool {
 				return t != sentinelType
 			}
-			s.Fields = utils.FilterSlice(s.Fields, isNotSentinel)
-			s.FieldsToIndex = utils.FilterMap(s.FieldsToIndex, isNotSentinel)
-
+			s.Fields = s.Fields.Filter(isNotSentinel)
 			structs = append(structs, s)
 		}
 	}

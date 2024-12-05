@@ -23,10 +23,10 @@ func TestNewStruct(t *testing.T) {
 		s, err := reflect.NewStruct(testStructType)
 		testutils.RequireNoError(t, err)
 		testutils.RequireEquals(t, "testStruct", s.Name)
-		testutils.RequireLen(t, s.Fields, 3)
-		testutils.RequireEquals(t, reflect.TypeOf(""), s.Fields[0])
-		testutils.RequireEquals(t, reflect.TypeOf(0), s.Fields[1])
-		testutils.RequireEquals(t, reflect.TypeOf(false), s.Fields[2])
+		testutils.RequireEquals(t, 3, s.Fields.Len())
+		testutils.RequireEquals(t, reflect.TypeOf(""), s.Fields.Keys()[0])
+		testutils.RequireEquals(t, reflect.TypeOf(0), s.Fields.Keys()[1])
+		testutils.RequireEquals(t, reflect.TypeOf(false), s.Fields.Keys()[2])
 	})
 
 	t.Run("not a struct", func(t *testing.T) {
