@@ -1,12 +1,14 @@
 package graph
 
+import "github.com/skjdfhkskjds/depinject/internal/utils"
+
 type DAG[VertexT Vertex] struct {
 	// vertices is a map of vertex IDs to vertices.
 	// Under the uniqueness constraint, each vertex ID maps to a single
 	// vertex. Without uniqueness, the directed graph is calculated with
 	// only a single vertex, but returns the whole set of vertices in order
 	// when topologically sorted.
-	vertices map[string][]VertexT
+	vertices *utils.OrderedMap[string, []VertexT]
 	edges    map[string][]VertexT
 	indegree map[string]int
 
@@ -18,7 +20,7 @@ type DAG[VertexT Vertex] struct {
 // NewDAG creates a new empty DAG.
 func NewDAG[VertexT Vertex](enforceUniqueVertices bool) *DAG[VertexT] {
 	return &DAG[VertexT]{
-		vertices:              make(map[string][]VertexT),
+		vertices:              utils.NewOrderedMap[string, []VertexT](),
 		edges:                 make(map[string][]VertexT),
 		indegree:              make(map[string]int),
 		enforceUniqueVertices: enforceUniqueVertices,
@@ -29,9 +31,10 @@ func NewDAG[VertexT Vertex](enforceUniqueVertices bool) *DAG[VertexT] {
 func (g *DAG[VertexT]) Vertices() []VertexT {
 	vertices := make([]VertexT, g.totalVertices)
 	i := 0
-	for _, v := range g.vertices {
-		for _, vv := range v {
-			vertices[i] = vv
+	for _, v := range g.vertices.Keys() {
+		verticesForKey, _ := g.vertices.Get(v)
+		for _, vertex := range verticesForKey {
+			vertices[i] = vertex
 			i++
 		}
 	}
@@ -44,11 +47,12 @@ func (g *DAG[VertexT]) AddVertex(v VertexT) error {
 		return ErrVertexAlreadyExists
 	}
 
-	if _, ok := g.vertices[v.ID()]; !ok {
-		g.vertices[v.ID()] = make([]VertexT, 0)
+	vertices, ok := g.vertices.Get(v.ID())
+	if !ok {
+		g.vertices.Set(v.ID(), []VertexT{})
 	}
 
-	g.vertices[v.ID()] = append(g.vertices[v.ID()], v)
+	g.vertices.Set(v.ID(), append(vertices, v))
 	g.indegree[v.ID()] = 0
 	g.totalVertices++
 	return nil
@@ -81,7 +85,7 @@ func (g *DAG[VertexT]) TopologicalSort() ([]VertexT, error) {
 	queue := []string{}
 
 	// Enqueue vertices with zero indegree
-	for vertex := range g.vertices {
+	for _, vertex := range g.vertices.Keys() {
 		if g.indegree[vertex] == 0 {
 			queue = append(queue, vertex)
 		}
@@ -91,7 +95,8 @@ func (g *DAG[VertexT]) TopologicalSort() ([]VertexT, error) {
 	for len(queue) > 0 {
 		v := queue[0]
 		queue = queue[1:]
-		sorted = append(sorted, g.vertices[v]...)
+		verticesForKey, _ := g.vertices.Get(v)
+		sorted = append(sorted, verticesForKey...)
 
 		// For each outgoing edge from 'v', reduce indegree and
 		// enqueue if it becomes zero
@@ -138,6 +143,6 @@ func (g *DAG[VertexT]) detectCycle(
 
 // hasVertex returns whether the given vertex exists in the DAG.
 func (g *DAG[VertexT]) hasVertex(v VertexT) bool {
-	_, exists := g.vertices[v.ID()]
+	_, exists := g.vertices.Get(v.ID())
 	return exists
 }

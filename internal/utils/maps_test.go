@@ -28,6 +28,11 @@ func TestOrderedMap(t *testing.T) {
 		val, ok = om.Get("d")
 		testutils.RequireFalse(t, ok)
 		testutils.RequireEquals(t, 0, val)
+
+		om.Set("b", 4)
+		val, ok = om.Get("b")
+		testutils.RequireTrue(t, ok)
+		testutils.RequireEquals(t, 4, val)
 	})
 
 	t.Run("maintains order", func(t *testing.T) {
@@ -47,6 +52,13 @@ func TestOrderedMap(t *testing.T) {
 		testutils.RequireEquals(t, 3, values[0])
 		testutils.RequireEquals(t, 1, values[1])
 		testutils.RequireEquals(t, 2, values[2])
+
+		om.Set("a", 5)
+		keys = om.Keys()
+		testutils.RequireLen(t, keys, 3)
+		testutils.RequireEquals(t, "c", keys[0])
+		testutils.RequireEquals(t, "a", keys[1])
+		testutils.RequireEquals(t, "b", keys[2])
 	})
 
 	t.Run("filter", func(t *testing.T) {

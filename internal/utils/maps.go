@@ -12,7 +12,11 @@ func NewOrderedMap[K comparable, V any]() *OrderedMap[K, V] {
 }
 
 func (om *OrderedMap[K, V]) Set(k K, v V) {
-	om.keys = append(om.keys, k)
+	// If the key doesn't exist, add it to the keys slice.
+	if _, ok := om.m[k]; !ok {
+		om.keys = append(om.keys, k)
+	}
+
 	om.m[k] = v
 }
 
