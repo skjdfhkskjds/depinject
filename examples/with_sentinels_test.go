@@ -37,9 +37,7 @@ func NewFooBarWithOut() FooBarWithOut {
 }
 
 func TestWithInSentinels(t *testing.T) {
-	container := depinject.NewContainer(
-		depinject.WithInSentinel(),
-	)
+	container := depinject.NewContainer().WithInSentinel()
 
 	// Supply a value into the container directly.
 	testutils.RequireNoError(t, container.Supply(&Foo{}))
@@ -63,9 +61,7 @@ func TestWithInSentinelsMultiple(t *testing.T) {
 }
 
 func TestWithOutSentinels(t *testing.T) {
-	container := depinject.NewContainer(
-		depinject.WithOutSentinel(),
-	)
+	container := depinject.NewContainer().WithOutSentinel()
 
 	// Provide a set of constructors into the container.
 	testutils.RequireNoError(t, container.Provide(
@@ -86,10 +82,9 @@ func TestWithOutSentinelsMultiple(t *testing.T) {
 }
 
 func TestWithInAndOutSentinels(t *testing.T) {
-	container := depinject.NewContainer(
-		depinject.WithInSentinel(),
-		depinject.WithOutSentinel(),
-	)
+	container := depinject.NewContainer().
+		WithInSentinel().
+		WithOutSentinel()
 
 	// Provide a set of constructors into the container.
 	testutils.RequireNoError(t, container.Provide(

@@ -18,12 +18,20 @@ type Registry struct {
 	inferInterfaces bool
 }
 
-func NewRegistry(inferLists, inferInterfaces bool) *Registry {
+func NewRegistry() *Registry {
 	return &Registry{
-		providers:       make(map[reflect.Type][]*Node),
-		inferLists:      inferLists,
-		inferInterfaces: inferInterfaces,
+		providers: make(map[reflect.Type][]*Node),
 	}
+}
+
+func (r *Registry) WithInferLists() *Registry {
+	r.inferLists = true
+	return r
+}
+
+func (r *Registry) WithInferInterfaces() *Registry {
+	r.inferInterfaces = true
+	return r
 }
 
 // Register registers a node in the registry.

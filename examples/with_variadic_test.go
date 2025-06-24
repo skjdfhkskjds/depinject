@@ -55,22 +55,26 @@ func TestWithVariadicMultipleArgs(t *testing.T) {
 }
 
 func TestWithVariadicInferredListInSupply(t *testing.T) {
-	container := depinject.NewContainer(depinject.WithListInference())
+	container := depinject.NewContainer().WithListInference()
+
+	bar1 := NewBar(NewFoo())
+	bar2 := NewBar(NewFoo())
 
 	testutils.RequireNoError(t, container.Supply(
-		depinject.WithInterfaceInference(),
-		depinject.WithListInference(),
-		depinject.WithInSentinel(),
+		NewFoo(),
+		bar1,
+		bar2,
 	))
-	testutils.RequireNoError(t, container.Provide(depinject.NewContainer))
+	testutils.RequireNoError(t, container.Provide(NewFooBarVariadic))
 
-	var container2 *depinject.Container
-	testutils.RequireNoError(t, container.Invoke(&container2))
-	testutils.RequireNotNil(t, container2)
+	var fooBarVariadic *FooBar
+	testutils.RequireNoError(t, container.Invoke(&fooBarVariadic))
+	testutils.RequireNotNil(t, fooBarVariadic)
+	fooBarVariadic.Print()
 }
 
 func TestWithVariadicInferredListInProvide(t *testing.T) {
-	container := depinject.NewContainer(depinject.WithListInference())
+	container := depinject.NewContainer().WithListInference()
 
 	testutils.RequireNoError(t, container.Supply(NewFoo()))
 	testutils.RequireNoError(t, container.Provide(

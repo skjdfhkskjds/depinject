@@ -18,12 +18,12 @@ func (v testVertex) ID() string {
 
 func TestDAG(t *testing.T) {
 	t.Run("NewDAG", func(t *testing.T) {
-		dag := graph.NewDAG[testVertex](false)
+		dag := graph.NewDAG[testVertex]()
 		testutils.RequireNotNil(t, dag)
 	})
 
 	t.Run("Vertices", func(t *testing.T) {
-		dag := graph.NewDAG[testVertex](false)
+		dag := graph.NewDAG[testVertex]()
 		testutils.RequireEmpty(t, dag.Vertices())
 
 		v1 := testVertex{id: "1"}
@@ -34,7 +34,7 @@ func TestDAG(t *testing.T) {
 	})
 
 	t.Run("AddVertex", func(t *testing.T) {
-		dag := graph.NewDAG[testVertex](true)
+		dag := graph.NewDAG[testVertex]()
 		v := testVertex{id: "1"}
 		testutils.RequireNoError(t, dag.AddVertex(v))
 
@@ -43,7 +43,7 @@ func TestDAG(t *testing.T) {
 	})
 
 	t.Run("AddVertex With RepeatedVertices", func(t *testing.T) {
-		dag := graph.NewDAG[testVertex](false)
+		dag := graph.NewDAG[testVertex]().WithNonUniqueVertices()
 		repeatedVertices := []testVertex{
 			{id: "2"},
 			{id: "2"},
@@ -56,7 +56,7 @@ func TestDAG(t *testing.T) {
 	})
 
 	t.Run("AddEdge", func(t *testing.T) {
-		dag := graph.NewDAG[testVertex](false)
+		dag := graph.NewDAG[testVertex]()
 		v1 := testVertex{id: "1"}
 		v2 := testVertex{id: "2"}
 
@@ -69,7 +69,7 @@ func TestDAG(t *testing.T) {
 	})
 
 	t.Run("TopologicalSort", func(t *testing.T) {
-		dag := graph.NewDAG[testVertex](false)
+		dag := graph.NewDAG[testVertex]()
 		v1 := testVertex{id: "1"}
 		v2 := testVertex{id: "2"}
 		v3 := testVertex{id: "3"}
@@ -93,7 +93,7 @@ func TestDAG(t *testing.T) {
 
 // BenchmarkAddVertex benchmarks the AddVertex method.
 func BenchmarkAddVertex(b *testing.B) {
-	dag := graph.NewDAG[testVertex](false)
+	dag := graph.NewDAG[testVertex]()
 	numVertices := 100000
 	vertices := make([]testVertex, numVertices)
 
@@ -110,7 +110,7 @@ func BenchmarkAddVertex(b *testing.B) {
 // BenchmarkAddEdgeLinear benchmarks the AddEdge method with a prebuilt,
 // linearly growing graph structure.
 func BenchmarkAddEdgeLinear(b *testing.B) {
-	dag := graph.NewDAG[testVertex](false)
+	dag := graph.NewDAG[testVertex]()
 
 	// pre-create a list of vertices
 	numVertices := 100000
@@ -135,7 +135,7 @@ func BenchmarkAddEdgeLinear(b *testing.B) {
 // BenchmarkAddEdgeComplex benchmarks the AddEdge method with a prebuilt,
 // branching graph structure.
 func BenchmarkAddEdgeComplex(b *testing.B) {
-	dag := graph.NewDAG[testVertex](false)
+	dag := graph.NewDAG[testVertex]()
 	initialVertex := testVertex{id: "0"}
 	dag.AddVertex(initialVertex)
 
@@ -174,7 +174,7 @@ func BenchmarkAddEdgeComplex(b *testing.B) {
 // BenchmarkTopologicalSortBasic benchmarks the TopologicalSort method with a
 // basic graph.
 func BenchmarkTopologicalSortBasic(b *testing.B) {
-	dag := graph.NewDAG[testVertex](false)
+	dag := graph.NewDAG[testVertex]()
 	vertices := []testVertex{
 		{id: "1"}, {id: "2"}, {id: "3"},
 		{id: "4"}, {id: "5"}, {id: "6"},
@@ -199,7 +199,7 @@ func BenchmarkTopologicalSortBasic(b *testing.B) {
 // BenchmarkTopologicalSort benchmarks the TopologicalSort method with a more
 // complex graph.
 func BenchmarkTopologicalSortComplex(b *testing.B) {
-	dag := graph.NewDAG[testVertex](false)
+	dag := graph.NewDAG[testVertex]()
 
 	// large set of vertices
 	numVertices := 100

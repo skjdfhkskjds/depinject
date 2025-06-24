@@ -18,13 +18,20 @@ type DAG[VertexT Vertex] struct {
 }
 
 // NewDAG creates a new empty DAG.
-func NewDAG[VertexT Vertex](enforceUniqueVertices bool) *DAG[VertexT] {
+//
+// Note: By default, the DAG will enforce unique vertices.
+func NewDAG[VertexT Vertex]() *DAG[VertexT] {
 	return &DAG[VertexT]{
 		vertices:              utils.NewOrderedMap[string, []VertexT](),
 		edges:                 make(map[string][]VertexT),
 		indegree:              make(map[string]int),
-		enforceUniqueVertices: enforceUniqueVertices,
+		enforceUniqueVertices: true,
 	}
+}
+
+func (g *DAG[VertexT]) WithNonUniqueVertices() *DAG[VertexT] {
+	g.enforceUniqueVertices = false
+	return g
 }
 
 // Vertices returns all vertices in the DAG.

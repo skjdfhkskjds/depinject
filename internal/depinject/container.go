@@ -56,14 +56,10 @@ func DefaultContainer() *Container {
 }
 
 // NewContainer returns a new container with the given options.
-func NewContainer(opts ...Option) *Container {
+func NewContainer() *Container {
 	c := DefaultContainer()
-	for _, opt := range opts {
-		opt(c)
-	}
-
-	c.graph = graph.NewDAG[*types.Node](!c.inferLists)
-	c.registry = types.NewRegistry(c.inferLists, c.inferInterfaces)
+	c.graph = graph.NewDAG[*types.Node]()
+	c.registry = types.NewRegistry()
 	return c
 }
 

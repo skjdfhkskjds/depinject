@@ -8,9 +8,7 @@ import (
 )
 
 func TestVariadicOptionsWithGenerics(t *testing.T) {
-	container := depinject.NewContainer(
-		depinject.WithListInference(),
-	)
+	container := depinject.NewContainer().WithListInference()
 
 	testutils.RequireNoError(t, container.Supply(WithFoo(NewFoo())))
 	testutils.RequireNoError(t, container.Provide(

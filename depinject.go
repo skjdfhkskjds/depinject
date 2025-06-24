@@ -34,31 +34,6 @@ var (
 
 	// DefaultContainer returns a new container with the default options.
 	DefaultContainer = depinject.DefaultContainer
-
-	// ===============================================================
-	//                            Options
-	// ===============================================================
-
-	// WithLogger sets the logger to dump the container's info to.
-	WithLogger = depinject.WithLogger
-
-	// Instructs the container to enable the use of sentinel
-	// structs in constructor arguments and parses the struct's
-	// fields as constructor arguments.
-	WithInSentinel = depinject.WithInSentinel
-
-	// Instructs the container to enable the use of sentinel
-	// structs in constructor outputs and parses the struct's
-	// fields as constructor outputs.
-	WithOutSentinel = depinject.WithOutSentinel
-
-	// Allows the container to match dependencies that are interfaces
-	// to types which are implementations of those interfaces.
-	WithInterfaceInference = depinject.WithInterfaceInference
-
-	// Allows the container to have multiple constructors with the same
-	// output type, and will process them as lists (slices or arrays).
-	WithListInference = depinject.WithListInference
 )
 
 // Global container instance for users who would rather not
