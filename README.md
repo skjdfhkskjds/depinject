@@ -10,7 +10,10 @@ Currently the framework supports the following features:
 
 - Constructors which return types **exactly** as requested by another's constructor.
 - Constructors which return types which **implement interfaces** requested by another's constructor.
+- Constructors which return types which **match a variadic argument** requested by another's constructor.
+- Constructors which return types which **match a generic type** requested by another's constructor.
 - Supplying values directly into the container.
+- Sentinel structs for constructor inputs and outputs.
 
 ## Getting Started
 
